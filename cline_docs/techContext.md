@@ -91,6 +91,32 @@ The extension currently uses Firebase Authentication:
   - Basic user info (display name, email, photo) stored in global state
 - Current Status: Non-critical for core functionality, primarily used for user session management
 
+## Build and Package Management
+
+1. Version Management Tools
+   - Changesets for version bumping
+     - Integrated with npm scripts
+     - Used for automated version updates
+     - Manages version numbers in package.json
+   - Changie for changelog management
+     - Configured in .changie.yaml
+     - Semantic versioning rules:
+       - Added/Deprecated -> minor version bump
+       - Changed/Removed -> major version bump
+       - Fixed/Security -> patch version bump
+
+2. Package Creation
+   - VSCode Extension Packaging (.vsix)
+     - `package:vsix` script for basic packaging
+     - `package:vsix:bump` script for version bump + package
+     - Outputs: gds-autodev-[version].vsix
+   - Build Process:
+     1. Build webview UI
+     2. Check TypeScript types
+     3. Run linting
+     4. Build extension (production mode)
+     5. Create .vsix package
+
 ## Technical Debt
 
 1. State Management

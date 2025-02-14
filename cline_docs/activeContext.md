@@ -285,3 +285,26 @@ Evaluating Firebase Authentication usage in the extension after forking to GDS A
    - Advanced filtering options
    - Batch operations
 4. Plan performance optimizations based on usage patterns
+
+## Recent Changes
+
+### Package and Version Management (2024-02-14)
+1. Added VSIX Package Creation
+   - Added `package:vsix` script for creating .vsix packages
+   - Added `package:vsix:bump` script for version bumping and packaging
+   - Integrated with existing build and test workflows
+
+2. Version Management Integration
+   - Using Changesets for version bumping
+   - Using Changie for changelog management
+   - Semantic versioning rules:
+     - Added/Deprecated -> minor version bump
+     - Changed/Removed -> major version bump
+     - Fixed/Security -> patch version bump
+
+3. Build Process Flow
+   - Create changeset describing changes
+   - Bump version using Changesets
+   - Build webview and extension
+   - Create .vsix package
+   - Output format: gds-autodev-[version].vsix
