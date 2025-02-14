@@ -1,5 +1,5 @@
 ---
-"claude-dev": patch
+"gds-autodev": patch
 ---
 
 Fix a bug where we were not properly checking for changesets in check-changeset git action

@@ -38,6 +38,24 @@ The project is a VSCode extension that uses:
 
 ## Recent Technical Changes
 
+### Message Queue Implementation (2024-02-14)
+- Added message queuing system for handling instructions during processing
+- Components:
+  1. MessageQueue class for core queue functionality
+  2. QueueTypes for type definitions and events
+  3. Queue integration in AutoDevProvider
+  4. Queue state management and synchronization
+- Features:
+  - Event-based queue processing
+  - State synchronization with UI
+  - Error handling with callbacks
+  - Queue status tracking
+- Implementation:
+  - Located in `src/shared/MessageQueue.ts`
+  - Types defined in `src/shared/QueueTypes.ts`
+  - Integration in `src/core/webview/AutoDevProvider.ts`
+  - UI components in `webview-ui/src/components/QueueStatusDisplay.tsx`
+
 ### Webview Initialization Improvements (2024-02-11)
 - Issue: Main panel was spinning and not showing content on initial load
 - Root Cause: Incorrect initialization sequence and message type mismatch
@@ -60,11 +78,11 @@ The project is a VSCode extension that uses:
 
 The extension currently uses Firebase Authentication:
 - Implementation: Located in `src/services/auth/FirebaseAuthManager.ts`
-- Configuration: Uses Firebase config from `cline-bot` project
+- Configuration: Uses Firebase config from `autodev-bot` project
 - Purpose: User authentication and session management
 - Flow:
   1. User initiates login via UI
-  2. Redirected to app.cline.bot/auth
+  2. Redirected to app.autodev.bot/auth
   3. Custom token returned after authentication
   4. Token used for Firebase sign-in
   5. Auth state changes trigger UI updates
@@ -79,6 +97,11 @@ The extension currently uses Firebase Authentication:
    - Consider implementing state validation middleware
    - Add automated testing for state transitions
    - Implement retry mechanisms for failed state updates
+   - Queue-related improvements needed:
+     - Add queue persistence across sessions
+     - Implement queue priority system
+     - Add queue operation retry mechanisms
+     - Improve queue state recovery
 
 2. Error Handling
    - Add more granular error types
@@ -89,3 +112,8 @@ The extension currently uses Firebase Authentication:
    - Add more unit tests for error scenarios
    - Implement integration tests for state synchronization
    - Add end-to-end tests for initialization sequence
+   - Queue-specific test improvements:
+     - Add queue operation unit tests
+     - Test queue state synchronization
+     - Test queue error scenarios
+     - Add queue performance tests

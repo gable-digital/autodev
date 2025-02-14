@@ -19,9 +19,9 @@ import { ApiProvider, ModelInfo } from "../../shared/api"
 import { findLast } from "../../shared/array"
 import { ExtensionMessage, ExtensionState } from "../../shared/ExtensionMessage"
 import { HistoryItem } from "../../shared/HistoryItem"
-import { ClineCheckpointRestore, WebviewMessage } from "../../shared/WebviewMessage"
+import { AutoDevCheckpointRestore, WebviewMessage } from "../../shared/WebviewMessage"
 import { fileExistsAtPath } from "../../utils/fs"
-import { Cline } from "../Cline"
+import { AutoDev } from "../AutoDev"
 import { openMention } from "../mentions"
 import { getNonce } from "./getNonce"
 import { getUri } from "./getUri"
@@ -85,17 +85,17 @@ export const GlobalFileNames = {
 	apiConversationHistory: "api_conversation_history.json",
 	uiMessages: "ui_messages.json",
 	openRouterModels: "openrouter_models.json",
-	mcpSettings: "cline_mcp_settings.json",
-	clineRules: ".clinerules",
+	mcpSettings: "AutoDev_mcp_settings.json",
+	AutoDevRules: ".AutoDevrules",
 }
 
-export class ClineProvider implements vscode.WebviewViewProvider {
-	public static readonly sideBarId = "claude-dev.SidebarProvider" // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
-	public static readonly tabPanelId = "claude-dev.TabPanelProvider"
-	private static activeInstances: Set<ClineProvider> = new Set()
+export class AutoDevProvider implements vscode.WebviewViewProvider {
+	public static readonly sideBarId = "gds-autodev.SidebarProvider" // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
+	public static readonly tabPanelId = "gds-autodev.TabPanelProvider"
+	private static activeInstances: Set<AutoDevProvider> = new Set()
 	private disposables: vscode.Disposable[] = []
 	private view?: vscode.WebviewView | vscode.WebviewPanel
-	private cline?: Cline
+	private AutoDev?: AutoDev
 	private workspaceTracker?: WorkspaceTracker
 	mcpHub?: McpHub
 	private authManager: FirebaseAuthManager
@@ -105,8 +105,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		readonly context: vscode.ExtensionContext,
 		private readonly outputChannel: vscode.OutputChannel,
 	) {
-		this.outputChannel.appendLine("ClineProvider instantiated")
-		ClineProvider.activeInstances.add(this)
+		this.outputChannel.appendLine("AutoDevProvider instantiated")
+		AutoDevProvider.activeInstances.add(this)
 		this.workspaceTracker = new WorkspaceTracker(this)
 		this.mcpHub = new McpHub(this)
 		this.authManager = new FirebaseAuthManager(this)
@@ -118,7 +118,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	- https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
 	*/
 	async dispose() {
-		this.outputChannel.appendLine("Disposing ClineProvider...")
+		this.outputChannel.appendLine("Disposing AutoDevProvider...")
 		await this.clearTask()
 		this.outputChannel.appendLine("Cleared task")
 		if (this.view && "dispose" in this.view) {
@@ -137,14 +137,14 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		this.mcpHub = undefined
 		this.authManager.dispose()
 		this.outputChannel.appendLine("Disposed all disposables")
-		ClineProvider.activeInstances.delete(this)
+		AutoDevProvider.activeInstances.delete(this)
 	}
 
 	// Auth methods
 	async handleSignOut() {
 		try {
 			await this.authManager.signOut()
-			vscode.window.showInformationMessage("Successfully logged out of Cline")
+			vscode.window.showInformationMessage("Successfully logged out of AutoDev")
 		} catch (error) {
 			vscode.window.showErrorMessage("Logout failed")
 		}
@@ -158,7 +158,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		await this.updateGlobalState("userInfo", info)
 	}
 
-	public static getVisibleInstance(): ClineProvider | undefined {
+	public static getVisibleInstance(): AutoDevProvider | undefined {
 		return findLast(Array.from(this.activeInstances), (instance) => instance.view?.visible === true)
 	}
 
@@ -248,11 +248,11 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		this.outputChannel.appendLine("Webview view resolved")
 	}
 
-	async initClineWithTask(task?: string, images?: string[]) {
+	async initAutoDevWithTask(task?: string, images?: string[]) {
 		await this.clearTask() // ensures that an existing task doesn't exist before starting a new one, although this shouldn't be possible since user must clear task before starting a new one
 		const { apiConfiguration, customInstructions, autoApprovalSettings, browserSettings, chatSettings } =
 			await this.getState()
-		this.cline = new Cline(
+		this.AutoDev = new AutoDev(
 			this,
 			apiConfiguration,
 			autoApprovalSettings,
@@ -264,11 +264,11 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		)
 	}
 
-	async initClineWithHistoryItem(historyItem: HistoryItem) {
+	async initAutoDevWithHistoryItem(historyItem: HistoryItem) {
 		await this.clearTask()
 		const { apiConfiguration, customInstructions, autoApprovalSettings, browserSettings, chatSettings } =
 			await this.getState()
-		this.cline = new Cline(
+		this.AutoDev = new AutoDev(
 			this,
 			apiConfiguration,
 			autoApprovalSettings,
@@ -283,7 +283,57 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 
 	// Send any JSON serializable data to the react app
 	async postMessageToWebview(message: ExtensionMessage) {
-		await this.view?.webview.postMessage(message)
+		// Convert ExtensionMessage to WebviewMessage
+		let webviewMessage: WebviewMessage;
+
+		switch (message.type) {
+			case "queueOperation":
+				webviewMessage = {
+					type: "queueOperation",
+					queueOperation: message.action as "cancelItem" | "clearQueue"
+				};
+				break;
+			case "state":
+				webviewMessage = {
+					type: "getLatestState",
+					...message.state
+				};
+				break;
+			case "invoke":
+				webviewMessage = {
+					type: "getLatestState",
+					text: message.text
+				};
+				break;
+			case "selectedImages":
+				webviewMessage = {
+					type: "getLatestState",
+					images: message.images
+				};
+				break;
+			case "openRouterModels":
+			case "ollamaModels":
+			case "lmStudioModels":
+			case "vsCodeLmModels":
+				// These model updates trigger a state refresh
+				await this.postStateToWebview();
+				webviewMessage = {
+					type: "getLatestState"
+				};
+				break;
+			default:
+				// For all other messages, trigger a state refresh
+				webviewMessage = {
+					type: "getLatestState"
+				};
+		}
+
+		if (this.AutoDev?.messageQueue) {
+			await this.AutoDev.messageQueue.enqueue(webviewMessage)
+		} else {
+			// Fallback to direct posting if queue not available
+			await this.view?.webview.postMessage(webviewMessage)
+		}
 	}
 
 	/**
@@ -350,7 +400,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}';">
             <link rel="stylesheet" type="text/css" href="${stylesUri}">
 			<link href="${codiconsUri}" rel="stylesheet" />
-            <title>Cline</title>
+            <title>AutoDev</title>
           </head>
           <body>
             <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -414,8 +464,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						// You can send any JSON serializable data.
 						// Could also do this in extension .ts
 						//this.postMessageToWebview({ type: "text", text: `Extension: ${Date.now()}` })
-						// initializing new instance of Cline will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
-						await this.initClineWithTask(message.text, message.images)
+						// initializing new instance of AutoDev will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
+						await this.initAutoDevWithTask(message.text, message.images)
 						break
 					case "apiConfiguration":
 						if (message.apiConfiguration) {
@@ -483,8 +533,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 							await this.updateGlobalState("liteLlmBaseUrl", liteLlmBaseUrl)
 							await this.updateGlobalState("liteLlmModelId", liteLlmModelId)
 							await this.updateGlobalState("qwenApiLine", qwenApiLine)
-							if (this.cline) {
-								this.cline.api = buildApiHandler(message.apiConfiguration)
+							if (this.AutoDev) {
+								this.AutoDev.api = buildApiHandler(message.apiConfiguration)
 							}
 						}
 						await this.postStateToWebview()
@@ -495,8 +545,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 					case "autoApprovalSettings":
 						if (message.autoApprovalSettings) {
 							await this.updateGlobalState("autoApprovalSettings", message.autoApprovalSettings)
-							if (this.cline) {
-								this.cline.autoApprovalSettings = message.autoApprovalSettings
+							if (this.AutoDev) {
+								this.AutoDev.autoApprovalSettings = message.autoApprovalSettings
 							}
 							await this.postStateToWebview()
 						}
@@ -504,8 +554,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 					case "browserSettings":
 						if (message.browserSettings) {
 							await this.updateGlobalState("browserSettings", message.browserSettings)
-							if (this.cline) {
-								this.cline.updateBrowserSettings(message.browserSettings)
+							if (this.AutoDev) {
+								this.AutoDev.updateBrowserSettings(message.browserSettings)
 							}
 							await this.postStateToWebview()
 						}
@@ -583,20 +633,20 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 										break
 								}
 
-								if (this.cline) {
+								if (this.AutoDev) {
 									const { apiConfiguration: updatedApiConfiguration } = await this.getState()
-									this.cline.api = buildApiHandler(updatedApiConfiguration)
+									this.AutoDev.api = buildApiHandler(updatedApiConfiguration)
 								}
 							}
 
 							await this.updateGlobalState("chatSettings", message.chatSettings)
 							await this.postStateToWebview()
 							// console.log("chatSettings", message.chatSettings)
-							if (this.cline) {
-								this.cline.updateChatSettings(message.chatSettings)
-								if (this.cline.isAwaitingPlanResponse && didSwitchToActMode) {
-									this.cline.didRespondToPlanAskBySwitchingMode = true
-									// this is necessary for the webview to update accordingly, but Cline instance will not send text back as feedback message
+							if (this.AutoDev) {
+								this.AutoDev.updateChatSettings(message.chatSettings)
+								if (this.AutoDev.isAwaitingPlanResponse && didSwitchToActMode) {
+									this.AutoDev.didRespondToPlanAskBySwitchingMode = true
+									// this is necessary for the webview to update accordingly, but AutoDev instance will not send text back as feedback message
 									await this.postMessageToWebview({
 										type: "invoke",
 										invoke: "sendMessage",
@@ -609,12 +659,12 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						}
 						break
 					// case "relaunchChromeDebugMode":
-					// 	if (this.cline) {
-					// 		this.cline.browserSession.relaunchChromeDebugMode()
+					// 	if (this.AutoDev) {
+					// 		this.AutoDev.browserSession.relaunchChromeDebugMode()
 					// 	}
 					// 	break
 					case "askResponse":
-						this.cline?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
+						this.AutoDev?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
 						break
 					case "clearTask":
 						// newTask will start a new task with a given task text, while clear task resets the current session and allows for a new task to be started
@@ -633,7 +683,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						})
 						break
 					case "exportCurrentTask":
-						const currentTaskId = this.cline?.taskId
+						const currentTaskId = this.AutoDev?.taskId
 						if (currentTaskId) {
 							this.exportTaskWithId(currentTaskId)
 						}
@@ -690,28 +740,28 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						break
 					case "checkpointDiff": {
 						if (message.number) {
-							await this.cline?.presentMultifileDiff(message.number, false)
+							await this.AutoDev?.presentMultifileDiff(message.number, false)
 						}
 						break
 					}
 					case "checkpointRestore": {
 						await this.cancelTask() // we cannot alter message history say if the task is active, as it could be in the middle of editing a file or running a command, which expect the ask to be responded to rather than being superceded by a new message eg add deleted_api_reqs
-						// cancel task waits for any open editor to be reverted and starts a new cline instance
+						// cancel task waits for any open editor to be reverted and starts a new AutoDev instance
 						if (message.number) {
 							// wait for messages to be loaded
-							await pWaitFor(() => this.cline?.isInitialized === true, {
+							await pWaitFor(() => this.AutoDev?.isInitialized === true, {
 								timeout: 3_000,
 							}).catch(() => {
-								console.error("Failed to init new cline instance")
+								console.error("Failed to init new AutoDev instance")
 							})
 							// NOTE: cancelTask awaits abortTask, which awaits diffViewProvider.revertChanges, which reverts any edited files, allowing us to reset to a checkpoint rather than running into a state where the revertChanges function is called alongside or after the checkpoint reset
-							await this.cline?.restoreCheckpoint(message.number, message.text! as ClineCheckpointRestore)
+							await this.AutoDev?.restoreCheckpoint(message.number, message.text! as AutoDevCheckpointRestore)
 						}
 						break
 					}
 					case "taskCompletionViewChanges": {
 						if (message.number) {
-							await this.cline?.presentMultifileDiff(message.number, true)
+							await this.AutoDev?.presentMultifileDiff(message.number, true)
 						}
 						break
 					}
@@ -736,7 +786,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						const uriScheme = vscode.env.uriScheme
 
 						const authUrl = vscode.Uri.parse(
-							`https://app.cline.bot/auth?state=${encodeURIComponent(nonce)}&callback_url=${encodeURIComponent(`${uriScheme || "vscode"}://saoudrizwan.claude-dev/auth`)}`,
+							`https://app.AutoDev.bot/auth?state=${encodeURIComponent(nonce)}&callback_url=${encodeURIComponent(`${uriScheme || "vscode"}://saoudrizwan.gds-autodev/auth`)}`,
 						)
 						vscode.env.openExternal(authUrl)
 						break
@@ -780,7 +830,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 						const settingsFilter = message.text || ""
 						await vscode.commands.executeCommand(
 							"workbench.action.openSettings",
-							`@ext:saoudrizwan.claude-dev ${settingsFilter}`.trim(), // trim whitespace if no settings filter
+							`@ext:saoudrizwan.gds-autodev ${settingsFilter}`.trim(), // trim whitespace if no settings filter
 						)
 						break
 					}
@@ -807,7 +857,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		// Currently ignoring errors to this endpoint, but after accounts we'll remove this anyways
 		try {
 			const response = await axios.post(
-				"https://app.cline.bot/api/mailing-list",
+				"https://app.AutoDev.bot/api/mailing-list",
 				{
 					email: email,
 				},
@@ -824,39 +874,39 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async cancelTask() {
-		if (this.cline) {
-			const { historyItem } = await this.getTaskWithId(this.cline.taskId)
+		if (this.AutoDev) {
+			const { historyItem } = await this.getTaskWithId(this.AutoDev.taskId)
 			try {
-				await this.cline.abortTask()
+				await this.AutoDev.abortTask()
 			} catch (error) {
 				console.error("Failed to abort task", error)
 			}
 			await pWaitFor(
 				() =>
-					this.cline === undefined ||
-					this.cline.isStreaming === false ||
-					this.cline.didFinishAbortingStream ||
-					this.cline.isWaitingForFirstChunk, // if only first chunk is processed, then there's no need to wait for graceful abort (closes edits, browser, etc)
+					this.AutoDev === undefined ||
+					this.AutoDev.isStreaming === false ||
+					this.AutoDev.didFinishAbortingStream ||
+					this.AutoDev.isWaitingForFirstChunk, // if only first chunk is processed, then there's no need to wait for graceful abort (closes edits, browser, etc)
 				{
 					timeout: 3_000,
 				},
 			).catch(() => {
 				console.error("Failed to abort task")
 			})
-			if (this.cline) {
-				// 'abandoned' will prevent this cline instance from affecting future cline instance gui. this may happen if its hanging on a streaming request
-				this.cline.abandoned = true
+			if (this.AutoDev) {
+				// 'abandoned' will prevent this AutoDev instance from affecting future AutoDev instance gui. this may happen if its hanging on a streaming request
+				this.AutoDev.abandoned = true
 			}
-			await this.initClineWithHistoryItem(historyItem) // clears task again, so we need to abortTask manually above
-			// await this.postStateToWebview() // new Cline instance will post state when it's ready. having this here sent an empty messages array to webview leading to virtuoso having to reload the entire list
+			await this.initAutoDevWithHistoryItem(historyItem) // clears task again, so we need to abortTask manually above
+			// await this.postStateToWebview() // new AutoDev instance will post state when it's ready. having this here sent an empty messages array to webview leading to virtuoso having to reload the entire list
 		}
 	}
 
 	async updateCustomInstructions(instructions?: string) {
 		// User may be clearing the field
 		await this.updateGlobalState("customInstructions", instructions || undefined)
-		if (this.cline) {
-			this.cline.customInstructions = instructions || undefined
+		if (this.AutoDev) {
+			this.AutoDev.customInstructions = instructions || undefined
 		}
 		await this.postStateToWebview()
 	}
@@ -884,11 +934,11 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 
 	async ensureMcpServersDirectoryExists(): Promise<string> {
 		const userDocumentsPath = await this.getDocumentsPath()
-		const mcpServersDir = path.join(userDocumentsPath, "Cline", "MCP")
+		const mcpServersDir = path.join(userDocumentsPath, "AutoDev", "MCP")
 		try {
 			await fs.mkdir(mcpServersDir, { recursive: true })
 		} catch (error) {
-			return "~/Documents/Cline/MCP" // in case creating a directory in documents fails for whatever reason (e.g. permissions) - this is fine since this path is only ever used in the system prompt
+			return "~/Documents/AutoDev/MCP" // in case creating a directory in documents fails for whatever reason (e.g. permissions) - this is fine since this path is only ever used in the system prompt
 		}
 		return mcpServersDir
 	}
@@ -968,10 +1018,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			// Then store the token securely
 			await this.storeSecret("authToken", token)
 			await this.postStateToWebview()
-			vscode.window.showInformationMessage("Successfully logged in to Cline")
+			vscode.window.showInformationMessage("Successfully logged in to AutoDev")
 		} catch (error) {
 			console.error("Failed to handle auth callback:", error)
-			vscode.window.showErrorMessage("Failed to log in to Cline")
+			vscode.window.showErrorMessage("Failed to log in to AutoDev")
 		}
 	}
 
@@ -1021,8 +1071,8 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		await this.updateGlobalState("apiProvider", openrouter)
 		await this.storeSecret("openRouterApiKey", apiKey)
 		await this.postStateToWebview()
-		if (this.cline) {
-			this.cline.api = buildApiHandler({
+		if (this.AutoDev) {
+			this.AutoDev.api = buildApiHandler({
 				apiProvider: openrouter,
 				openRouterApiKey: apiKey,
 			})
@@ -1197,10 +1247,10 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async showTaskWithId(id: string) {
-		if (id !== this.cline?.taskId) {
+		if (id !== this.AutoDev?.taskId) {
 			// non-current task
 			const { historyItem } = await this.getTaskWithId(id)
-			await this.initClineWithHistoryItem(historyItem) // clears existing task
+			await this.initAutoDevWithHistoryItem(historyItem) // clears existing task
 		}
 		await this.postMessageToWebview({
 			type: "action",
@@ -1214,7 +1264,7 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 	}
 
 	async deleteTaskWithId(id: string) {
-		if (id === this.cline?.taskId) {
+		if (id === this.AutoDev?.taskId) {
 			await this.clearTask()
 		}
 
@@ -1283,9 +1333,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			apiConfiguration,
 			customInstructions,
 			uriScheme: vscode.env.uriScheme,
-			currentTaskItem: this.cline?.taskId ? (taskHistory || []).find((item) => item.id === this.cline?.taskId) : undefined,
-			checkpointTrackerErrorMessage: this.cline?.checkpointTrackerErrorMessage,
-			clineMessages: this.cline?.clineMessages || [],
+			currentTaskItem: this.AutoDev?.taskId ? (taskHistory || []).find((item) => item.id === this.AutoDev?.taskId) : undefined,
+			checkpointTrackerErrorMessage: this.AutoDev?.checkpointTrackerErrorMessage,
+			autoDevMessages: this.AutoDev?.AutoDevMessages || [],
 			taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),
 			shouldShowAnnouncement: lastShownAnnouncementId !== this.latestAnnouncementId,
 			autoApprovalSettings,
@@ -1293,23 +1343,24 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 			chatSettings,
 			isLoggedIn: !!authToken,
 			userInfo,
+			queueState: this.AutoDev?.messageQueue?.getState(),
 		}
 	}
 
 	async clearTask() {
-		this.cline?.abortTask()
-		this.cline = undefined // removes reference to it, so once promises end it will be garbage collected
+		this.AutoDev?.abortTask()
+		this.AutoDev = undefined // removes reference to it, so once promises end it will be garbage collected
 	}
 
 	// Caching mechanism to keep track of webview messages + API conversation history per provider instance
 
 	/*
-	Now that we use retainContextWhenHidden, we don't have to store a cache of cline messages in the user's state, but we could to reduce memory footprint in long conversations.
+	Now that we use retainContextWhenHidden, we don't have to store a cache of AutoDev messages in the user's state, but we could to reduce memory footprint in long conversations.
 
-	- We have to be careful of what state is shared between ClineProvider instances since there could be multiple instances of the extension running at once. For example when we cached cline messages using the same key, two instances of the extension could end up using the same key and overwriting each other's messages.
+	- We have to be careful of what state is shared between AutoDevProvider instances since there could be multiple instances of the extension running at once. For example when we cached AutoDev messages using the same key, two instances of the extension could end up using the same key and overwriting each other's messages.
 	- Some state does need to be shared between the instances, i.e. the API key--however there doesn't seem to be a good way to notify the other instances that the API key has changed.
 
-	We need to use a unique identifier for each ClineProvider instance's message cache since we could be running several instances of the extension outside of just the sidebar i.e. in editor panels.
+	We need to use a unique identifier for each AutoDevProvider instance's message cache since we could be running several instances of the extension outside of just the sidebar i.e. in editor panels.
 
 	// conversation history to send in API requests
 
@@ -1578,9 +1629,9 @@ export class ClineProvider implements vscode.WebviewViewProvider {
 		for (const key of secretKeys) {
 			await this.storeSecret(key, undefined)
 		}
-		if (this.cline) {
-			this.cline.abortTask()
-			this.cline = undefined
+		if (this.AutoDev) {
+			this.AutoDev.abortTask()
+			this.AutoDev = undefined
 		}
 		vscode.window.showInformationMessage("State reset")
 		await this.postStateToWebview()

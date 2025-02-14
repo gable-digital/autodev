@@ -56,7 +56,7 @@ const WelcomeView = () => {
 					padding: "0 20px",
 					overflow: "auto",
 				}}>
-				<h2>Hi, I'm Cline</h2>
+				<h2>Hi, I'm AutoDev</h2>
 				<p>
 					I can do all kinds of tasks thanks to the latest breakthroughs in{" "}
 					<VSCodeLink
@@ -87,7 +87,7 @@ const WelcomeView = () => {
 					) : (
 						<>
 							<p style={{ margin: 0, marginBottom: "8px" }}>
-								While Cline currently requires you bring your own API key, we are working on an official accounts
+								While AutoDev currently requires you bring your own API key, we are working on an official accounts
 								system with additional capabilities. Subscribe to our mailing list to get updates!
 							</p>
 							<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>

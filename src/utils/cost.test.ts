@@ -1,4 +1,3 @@
-import { describe, it } from "mocha"
 import "should"
 import { calculateApiCost } from "./cost"
 import { ModelInfo } from "../shared/api"

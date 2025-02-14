@@ -4,10 +4,10 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "
 import { useEvent, useSize } from "react-use"
 import styled from "styled-components"
 import {
-	ClineApiReqInfo,
-	ClineAskUseMcpServer,
-	ClineMessage,
-	ClineSayTool,
+	AutoDevApiReqInfo,
+	AutoDevAskUseMcpServer,
+	AutoDevMessage,
+	AutoDevSayTool,
 	COMPLETION_RESULT_CHANGES_FLAG,
 	ExtensionMessage,
 } from "../../../../src/shared/ExtensionMessage"
@@ -35,10 +35,10 @@ const ChatRowContainer = styled.div`
 `
 
 interface ChatRowProps {
-	message: ClineMessage
+	message: AutoDevMessage
 	isExpanded: boolean
 	onToggleExpand: () => void
-	lastModifiedMessage?: ClineMessage
+	lastModifiedMessage?: AutoDevMessage
 	isLast: boolean
 	onHeightChange: (isTaller: boolean) => void
 }
@@ -105,7 +105,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 
 	const [cost, apiReqCancelReason, apiReqStreamingFailedMessage] = useMemo(() => {
 		if (message.text != null && message.say === "api_req_started") {
-			const info: ClineApiReqInfo = JSON.parse(message.text)
+			const info: AutoDevApiReqInfo = JSON.parse(message.text)
 			return [info.cost, info.cancelReason, info.streamingFailedMessage]
 		}
 		return [undefined, undefined, undefined]
@@ -161,7 +161,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							color: errorColor,
 							marginBottom: "-1.5px",
 						}}></span>,
-					<span style={{ color: errorColor, fontWeight: "bold" }}>Cline is having trouble...</span>,
+					<span style={{ color: errorColor, fontWeight: "bold" }}>AutoDev is having trouble...</span>,
 				]
 			case "auto_approval_max_req_reached":
 				return [
@@ -186,11 +186,11 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							}}></span>
 					),
 					<span style={{ color: normalColor, fontWeight: "bold" }}>
-						{message.type === "ask" ? "Cline wants to execute this command:" : "Cline executed this command:"}
+						{message.type === "ask" ? "AutoDev wants to execute this command:" : "AutoDev executed this command:"}
 					</span>,
 				]
 			case "use_mcp_server":
-				const mcpServerUse = JSON.parse(message.text || "{}") as ClineAskUseMcpServer
+				const mcpServerUse = JSON.parse(message.text || "{}") as AutoDevAskUseMcpServer
 				return [
 					isMcpServerResponding ? (
 						<ProgressIndicator />
@@ -205,12 +205,12 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 					<span style={{ color: normalColor, fontWeight: "bold" }}>
 						{message.type === "ask" ? (
 							<>
-								Cline wants to {mcpServerUse.type === "use_mcp_tool" ? "use a tool" : "access a resource"} on the{" "}
+								AutoDev wants to {mcpServerUse.type === "use_mcp_tool" ? "use a tool" : "access a resource"} on the{" "}
 								<code>{mcpServerUse.serverName}</code> MCP server:
 							</>
 						) : (
 							<>
-								Cline {mcpServerUse.type === "use_mcp_tool" ? "used a tool" : "accessed a resource"} on the{" "}
+								AutoDev {mcpServerUse.type === "use_mcp_tool" ? "used a tool" : "accessed a resource"} on the{" "}
 								<code>{mcpServerUse.serverName}</code> MCP server:
 							</>
 						)}
@@ -293,7 +293,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							color: normalColor,
 							marginBottom: "-1.5px",
 						}}></span>,
-					<span style={{ color: normalColor, fontWeight: "bold" }}>Cline has a question:</span>,
+					<span style={{ color: normalColor, fontWeight: "bold" }}>AutoDev has a question:</span>,
 				]
 			default:
 				return [null, null]
@@ -325,7 +325,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 
 	const tool = useMemo(() => {
 		if (message.ask === "tool" || message.say === "tool") {
-			return JSON.parse(message.text || "{}") as ClineSayTool
+			return JSON.parse(message.text || "{}") as AutoDevSayTool
 		}
 		return null
 	}, [message.ask, message.say, message.text])
@@ -347,7 +347,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						<div style={headerStyle}>
 							{toolIcon("edit")}
 							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask" ? "Cline wants to edit this file:" : "Cline is editing this file:"}
+								{message.type === "ask" ? "AutoDev wants to edit this file:" : "AutoDev is editing this file:"}
 							</span>
 						</div>
 						<CodeAccordian
@@ -365,7 +365,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						<div style={headerStyle}>
 							{toolIcon("new-file")}
 							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask" ? "Cline wants to create a new file:" : "Cline is creating a new file:"}
+								{message.type === "ask" ? "AutoDev wants to create a new file:" : "AutoDev is creating a new file:"}
 							</span>
 						</div>
 						<CodeAccordian
@@ -383,7 +383,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						<div style={headerStyle}>
 							{toolIcon("file-code")}
 							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask" ? "Cline wants to read this file:" : "Cline read this file:"}
+								{message.type === "ask" ? "AutoDev wants to read this file:" : "AutoDev read this file:"}
 							</span>
 						</div>
 						{/* <CodeAccordian
@@ -447,8 +447,8 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							{toolIcon("folder-opened")}
 							<span style={{ fontWeight: "bold" }}>
 								{message.type === "ask"
-									? "Cline wants to view the top level files in this directory:"
-									: "Cline viewed the top level files in this directory:"}
+									? "AutoDev wants to view the top level files in this directory:"
+									: "AutoDev viewed the top level files in this directory:"}
 							</span>
 						</div>
 						<CodeAccordian
@@ -467,8 +467,8 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							{toolIcon("folder-opened")}
 							<span style={{ fontWeight: "bold" }}>
 								{message.type === "ask"
-									? "Cline wants to recursively view all files in this directory:"
-									: "Cline recursively viewed all files in this directory:"}
+									? "AutoDev wants to recursively view all files in this directory:"
+									: "AutoDev recursively viewed all files in this directory:"}
 							</span>
 						</div>
 						<CodeAccordian
@@ -487,8 +487,8 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							{toolIcon("file-code")}
 							<span style={{ fontWeight: "bold" }}>
 								{message.type === "ask"
-									? "Cline wants to view source code definition names used in this directory:"
-									: "Cline viewed source code definition names used in this directory:"}
+									? "AutoDev wants to view source code definition names used in this directory:"
+									: "AutoDev viewed source code definition names used in this directory:"}
 							</span>
 						</div>
 						<CodeAccordian
@@ -507,11 +507,11 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 							<span style={{ fontWeight: "bold" }}>
 								{message.type === "ask" ? (
 									<>
-										Cline wants to search this directory for <code>{tool.regex}</code>:
+										AutoDev wants to search this directory for <code>{tool.regex}</code>:
 									</>
 								) : (
 									<>
-										Cline searched this directory for <code>{tool.regex}</code>:
+										AutoDev searched this directory for <code>{tool.regex}</code>:
 									</>
 								)}
 							</span>
@@ -534,9 +534,9 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 			// 				{isInspecting ? <ProgressIndicator /> : toolIcon("inspect")}
 			// 				<span style={{ fontWeight: "bold" }}>
 			// 					{message.type === "ask" ? (
-			// 						<>Cline wants to inspect this website:</>
+			// 						<>AutoDev wants to inspect this website:</>
 			// 					) : (
-			// 						<>Cline is inspecting this website:</>
+			// 						<>AutoDev is inspecting this website:</>
 			// 					)}
 			// 				</span>
 			// 			</div>
@@ -648,7 +648,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 	}
 
 	if (message.ask === "use_mcp_server" || message.say === "use_mcp_server") {
-		const useMcpServer = JSON.parse(message.text || "{}") as ClineAskUseMcpServer
+		const useMcpServer = JSON.parse(message.text || "{}") as AutoDevAskUseMcpServer
 		const server = mcpServers.find((server) => server.name === useMcpServer.serverName)
 		return (
 			<>
@@ -775,7 +775,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 												<br />
 												It seems like you're having Windows PowerShell issues, please see this{" "}
 												<a
-													href="https://github.com/cline/cline/wiki/TroubleShooting-%E2%80%90-%22PowerShell-is-not-recognized-as-an-internal-or-external-command%22"
+													href="https://github.com/autodev/autodev/wiki/TroubleShooting-%E2%80%90-%22PowerShell-is-not-recognized-as-an-internal-or-external-command%22"
 													style={{
 														color: "inherit",
 														textDecoration: "underline",
@@ -916,7 +916,7 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						</div>
 					)
 				case "user_feedback_diff":
-					const tool = JSON.parse(message.text || "{}") as ClineSayTool
+					const tool = JSON.parse(message.text || "{}") as AutoDevSayTool
 					return (
 						<div
 							style={{
@@ -1065,12 +1065,12 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 									</span>
 								</div>
 								<div>
-									Cline won't be able to view the command's output. Please update VSCode (
+									AutoDev won't be able to view the command's output. Please update VSCode (
 									<code>CMD/CTRL + Shift + P</code> → "Update") and make sure you're using a supported shell:
 									zsh, bash, fish, or PowerShell (<code>CMD/CTRL + Shift + P</code> → "Terminal: Select Default
 									Profile").{" "}
 									<a
-										href="https://github.com/cline/cline/wiki/Troubleshooting-%E2%80%90-Shell-Integration-Unavailable"
+										href="https://github.com/autodev/autodev/wiki/Troubleshooting-%E2%80%90-Shell-Integration-Unavailable"
 										style={{
 											color: "inherit",
 											textDecoration: "underline",

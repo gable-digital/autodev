@@ -1,7 +1,7 @@
 # Product Context
 
 ## Project Overview
-Cline is a VSCode extension that provides an AI-powered development assistant. It helps developers with tasks ranging from code generation to project management, integrating seamlessly with VSCode's interface.
+AutoDev is a VSCode extension that provides an AI-powered development assistant. It helps developers with tasks ranging from code generation to project management, integrating seamlessly with VSCode's interface.
 
 ## Core Problems Solved
 1. Development Assistance
@@ -42,6 +42,9 @@ Cline is a VSCode extension that provides an AI-powered development assistant. I
    - Tracks ongoing tasks
    - Maintains task history
    - Handles task state persistence
+   - Supports instruction queuing during processing
+   - Shows queue status and progress
+   - Allows task input during operations
 
 3. Configuration Management
    - Manages API settings
@@ -50,6 +53,16 @@ Cline is a VSCode extension that provides an AI-powered development assistant. I
 
 ## Recent Improvements
 
+### Message Queue Implementation
+- **Problem**: Users couldn't input new instructions during processing
+- **Impact**: Reduced productivity due to blocking operations
+- **Solution**: Implemented message queue system for handling instructions
+- **Benefits**:
+  - Users can queue multiple instructions
+  - UI remains responsive during processing
+  - Better task management and organization
+  - Improved user feedback and status updates
+
 ### Webview Initialization Enhancement
 - **Problem**: Main panel would show spinning loader indefinitely
 - **Impact**: Users couldn't access the interface in main panel view
@@ -57,7 +70,14 @@ Cline is a VSCode extension that provides an AI-powered development assistant. I
 - **Benefit**: More reliable startup and better user experience
 
 ## Future Enhancements
-1. Improved Error Handling
+1. Queue System Improvements
+   - Priority-based message processing
+   - Queue management controls
+   - Enhanced status visualization
+   - Queue operation cancellation
+   - Better error recovery for queued tasks
+
+2. Improved Error Handling
    - Better error messages for initialization issues
    - More robust recovery from failed states
    - Enhanced logging for debugging

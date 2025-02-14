@@ -8,7 +8,7 @@ interface AnnouncementProps {
 }
 
 /*
-You must update the latestAnnouncementId in ClineProvider for new announcements to show to users. This new id will be compared with whats in state for the 'last announcement shown', and if it's different then the announcement will render. As soon as an announcement is shown, the id will be updated in state. This ensures that announcements are not shown more than once, even if the user doesn't close it themselves.
+You must update the latestAnnouncementId in AutoDevProvider for new announcements to show to users. This new id will be compared with whats in state for the 'last announcement shown', and if it's different then the announcement will render. As soon as an announcement is shown, the id will be updated in state. This ensures that announcements are not shown more than once, even if the user doesn't close it themselves.
 */
 const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 	const minorVersion = version.split(".").slice(0, 2).join(".") // 2.0.0 -> 2.0
@@ -30,7 +30,7 @@ const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 			</h3>
 			<ul style={{ margin: "0 0 8px", paddingLeft: "12px" }}>
 				<li>
-					<b>Plan/Act mode toggle:</b> Plan mode turns Cline into an architect that gathers information, asks clarifying
+					<b>Plan/Act mode toggle:</b> Plan mode turns AutoDev into an architect that gathers information, asks clarifying
 					questions, and designs a solution. Switch back to Act mode to let him execute the plan!{" "}
 					<VSCodeLink href="https://x.com/sdrzn/status/1881761978986934582" style={{ display: "inline" }}>
 						See a demo here.
@@ -47,7 +47,7 @@ const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 					individual tools
 				</li>
 				<li>
-					In case you missed it, Cline now supports Checkpoints!{" "}
+					In case you missed it, AutoDev now supports Checkpoints!{" "}
 					<VSCodeLink href="https://x.com/sdrzn/status/1876378124126236949" style={{ display: "inline" }}>
 						See it in action here.
 					</VSCodeLink>
@@ -87,16 +87,16 @@ const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 					)}
 				</li>
 				<li>
-					<b>Edit Cline's changes before accepting!</b> When he creates or edits a file, you can modify his
+					<b>Edit AutoDev's changes before accepting!</b> When he creates or edits a file, you can modify his
 					changes directly in the right side of the diff view (+ hover over the 'Revert Block' arrow button in
 					the center to undo "<code>{"// rest of code here"}</code>" shenanigans)
 				</li>
 				<li>
-					New <code>search_files</code> tool that lets Cline perform regex searches in your project, letting
+					New <code>search_files</code> tool that lets AutoDev perform regex searches in your project, letting
 					him refactor code, address TODOs and FIXMEs, remove dead code, and more!
 				</li>
 				<li>
-					When Cline runs commands, you can now type directly in the terminal (+ support for Python
+					When AutoDev runs commands, you can now type directly in the terminal (+ support for Python
 					environments)
 				</li>
 			</ul>*/}
@@ -110,12 +110,12 @@ const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 			/>
 			<p style={{ margin: "0" }}>
 				Join our{" "}
-				<VSCodeLink style={{ display: "inline" }} href="https://discord.gg/cline">
+				<VSCodeLink style={{ display: "inline" }} href="https://discord.gg/autodev">
 					discord
 				</VSCodeLink>{" "}
 				or{" "}
-				<VSCodeLink style={{ display: "inline" }} href="https://www.reddit.com/r/cline/">
-					r/cline
+				<VSCodeLink style={{ display: "inline" }} href="https://www.reddit.com/r/autodev/">
+					r/autodev
 				</VSCodeLink>
 				for more updates!
 			</p>

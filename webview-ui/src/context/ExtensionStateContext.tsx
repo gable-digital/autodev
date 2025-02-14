@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { useEvent } from "react-use"
 import { DEFAULT_AUTO_APPROVAL_SETTINGS } from "../../../src/shared/AutoApprovalSettings"
-import { ExtensionMessage, ExtensionState } from "../../../src/shared/ExtensionMessage"
+import { ExtensionMessage, ExtensionState, AutoDevMessage } from "../../../src/shared/ExtensionMessage"
 import { ApiConfiguration, ModelInfo, openRouterDefaultModelId, openRouterDefaultModelInfo } from "../../../src/shared/api"
+import { QueueState } from "../../../src/shared/QueueTypes"
 import { findLastIndex } from "../../../src/shared/array"
 import { McpServer } from "../../../src/shared/mcp"
 import { convertTextMateToHljs } from "../utils/textMateToHljs"
@@ -21,6 +22,7 @@ interface ExtensionStateContextType extends ExtensionState {
 	setApiConfiguration: (config: ApiConfiguration) => void
 	setCustomInstructions: (value?: string) => void
 	setShowAnnouncement: (value: boolean) => void
+	cancelQueueItem: (id: string) => void
 }
 
 const ExtensionStateContext = createContext<ExtensionStateContextType | undefined>(undefined)
@@ -30,7 +32,7 @@ export const ExtensionStateContextProvider: React.FC<{
 }> = ({ children }) => {
 	const [state, setState] = useState<ExtensionState>({
 		version: "",
-		clineMessages: [],
+		autoDevMessages: [],
 		taskHistory: [],
 		shouldShowAnnouncement: false,
 		autoApprovalSettings: DEFAULT_AUTO_APPROVAL_SETTINGS,
@@ -74,6 +76,17 @@ export const ExtensionStateContextProvider: React.FC<{
 					: false
 				setShowWelcome(!hasKey)
 				setDidHydrateState(true)
+				// Send state verification response
+				vscode.postMessage({ type: "verifyState" })
+				break
+			}
+			case "action": {
+				switch (message.action) {
+					case "stateVerified":
+						// State verification received from extension
+						console.log("State verification received")
+						break
+				}
 				break
 			}
 			case "theme": {
@@ -90,11 +103,11 @@ export const ExtensionStateContextProvider: React.FC<{
 				const partialMessage = message.partialMessage!
 				setState((prevState) => {
 					// worth noting it will never be possible for a more up-to-date message to be sent here or in normal messages post since the presentAssistantContent function uses lock
-					const lastIndex = findLastIndex(prevState.clineMessages, (msg) => msg.ts === partialMessage.ts)
+					const lastIndex = findLastIndex(prevState.autoDevMessages, (msg: AutoDevMessage) => msg.ts === partialMessage.ts)
 					if (lastIndex !== -1) {
-						const newClineMessages = [...prevState.clineMessages]
-						newClineMessages[lastIndex] = partialMessage
-						return { ...prevState, clineMessages: newClineMessages }
+						const newMessages = [...prevState.autoDevMessages]
+						newMessages[lastIndex] = partialMessage
+						return { ...prevState, autoDevMessages: newMessages }
 					}
 					return prevState
 				})
@@ -115,6 +128,13 @@ export const ExtensionStateContextProvider: React.FC<{
 			}
 			case "mcpServers": {
 				setMcpServers(message.mcpServers ?? [])
+				break
+			}
+			case "queueOperation": {
+				setState(prevState => ({
+					...prevState,
+					queueState: message.state?.queueState
+				}))
 				break
 			}
 		}
@@ -150,6 +170,11 @@ export const ExtensionStateContextProvider: React.FC<{
 				...prevState,
 				shouldShowAnnouncement: value,
 			})),
+		cancelQueueItem: (id) => vscode.postMessage({ 
+			type: "queueOperation", 
+			queueOperation: "cancelItem", 
+			text: id 
+		}),
 	}
 
 	return <ExtensionStateContext.Provider value={contextValue}>{children}</ExtensionStateContext.Provider>

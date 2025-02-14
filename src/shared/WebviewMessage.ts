@@ -8,6 +8,7 @@ export interface WebviewMessage {
 		| "apiConfiguration"
 		| "customInstructions"
 		| "webviewDidLaunch"
+		| "verifyState"
 		| "newTask"
 		| "askResponse"
 		| "clearTask"
@@ -42,10 +43,10 @@ export interface WebviewMessage {
 		| "accountLoginClicked"
 		| "accountLogoutClicked"
 		| "subscribeEmail"
-	// | "relaunchChromeDebugMode"
+		| "queueOperation"
 	text?: string
 	disabled?: boolean
-	askResponse?: ClineAskResponse
+	askResponse?: AutoDevAskResponse
 	apiConfiguration?: ApiConfiguration
 	images?: string[]
 	bool?: boolean
@@ -58,8 +59,11 @@ export interface WebviewMessage {
 	serverName?: string
 	toolName?: string
 	autoApprove?: boolean
+
+	// For queue operations
+	queueOperation?: "cancelItem" | "clearQueue"
 }
 
-export type ClineAskResponse = "yesButtonClicked" | "noButtonClicked" | "messageResponse"
+export type AutoDevAskResponse = "yesButtonClicked" | "noButtonClicked" | "messageResponse"
 
-export type ClineCheckpointRestore = "task" | "workspace" | "taskAndWorkspace"
+export type AutoDevCheckpointRestore = "task" | "workspace" | "taskAndWorkspace"
