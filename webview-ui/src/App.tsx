@@ -12,6 +12,7 @@ import McpView from "./components/mcp/McpView"
 
 const AppContent = () => {
 	const { didHydrateState, showWelcome, shouldShowAnnouncement } = useExtensionState()
+	console.log("AppContent rendering with state:", { didHydrateState, showWelcome, shouldShowAnnouncement })
 	const [showSettings, setShowSettings] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
 	const [showMcp, setShowMcp] = useState(false)
@@ -68,7 +69,8 @@ const AppContent = () => {
 	}, [shouldShowAnnouncement])
 
 	if (!didHydrateState) {
-		return null
+		console.log("State not hydrated yet, returning loading state")
+		return <div style={{ padding: "16px" }}>Loading...</div>
 	}
 
 	return (

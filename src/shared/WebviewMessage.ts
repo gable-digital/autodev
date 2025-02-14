@@ -1,7 +1,8 @@
-import { ApiConfiguration } from "./api"
+import { ApiConfiguration, ModelInfo } from "./api"
 import { AutoApprovalSettings } from "./AutoApprovalSettings"
 import { BrowserSettings } from "./BrowserSettings"
 import { ChatSettings } from "./ChatSettings"
+import { McpServer } from "./mcp"
 
 export interface WebviewMessage {
 	type:
@@ -44,6 +45,14 @@ export interface WebviewMessage {
 		| "accountLogoutClicked"
 		| "subscribeEmail"
 		| "queueOperation"
+		| "theme"
+		| "selectedImages"
+		| "ollamaModels"
+		| "lmStudioModels"
+		| "vsCodeLmModels"
+		| "openRouterModels"
+		| "openAiModels"
+		| "mcpServers"
 	text?: string
 	disabled?: boolean
 	askResponse?: AutoDevAskResponse
@@ -62,6 +71,14 @@ export interface WebviewMessage {
 
 	// For queue operations
 	queueOperation?: "cancelItem" | "clearQueue"
+
+	// For model lists
+	ollamaModels?: string[]
+	lmStudioModels?: string[]
+	vsCodeLmModels?: { vendor?: string; family?: string; version?: string; id?: string }[]
+	openRouterModels?: Record<string, ModelInfo>
+	openAiModels?: string[]
+	mcpServers?: McpServer[]
 }
 
 export type AutoDevAskResponse = "yesButtonClicked" | "noButtonClicked" | "messageResponse"

@@ -30,6 +30,34 @@
    - Webview → Extension: Uses `onDidReceiveMessage` with WebviewMessage type
    - All messages must follow defined interfaces in type definitions
    - Messages are managed by MessageQueue for asynchronous processing
+   - Special message types (e.g., getLatestState) require explicit handling
+
+2. Message Type System
+   - ExtensionMessage: Standard extension-to-webview messages
+     - Used for regular updates and commands
+     - Follows strict type definitions
+   - WebviewMessage: Special state-related messages
+     - Used for state hydration and initialization
+     - Contains complete state information
+     - Critical for webview rendering
+
+3. State Hydration Flow
+   ```
+   AutoDevProvider
+   ↓
+   postMessageToWebview converts ExtensionMessage to WebviewMessage
+   ↓
+   ExtensionStateContext handles both message types
+   ↓
+   State hydration controls UI rendering
+   ```
+
+4. Message Handling Best Practices
+   - Handle both ExtensionMessage and WebviewMessage types
+   - Use type safety with proper message type checking
+   - Implement comprehensive logging for debugging
+   - Ensure proper state extraction and setting
+   - Set state flags (e.g., didHydrateState) correctly
 
 ### Queue Management Pattern
 1. Message Queue Architecture

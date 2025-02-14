@@ -283,56 +283,98 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 
 	// Send any JSON serializable data to the react app
 	async postMessageToWebview(message: ExtensionMessage) {
-		// Convert ExtensionMessage to WebviewMessage
-		let webviewMessage: WebviewMessage
+		this.outputChannel.appendLine(
+			`[AutoDevProvider] Posting message to webview: ${message.type}${message.action ? ` (${message.action})` : ""}`,
+		)
 
+		let webviewMessage: WebviewMessage
 		switch (message.type) {
-			case "queueOperation":
-				webviewMessage = {
-					type: "queueOperation",
-					queueOperation: message.action as "cancelItem" | "clearQueue",
-				}
-				break
 			case "state":
 				webviewMessage = {
 					type: "getLatestState",
 					...message.state,
 				}
 				break
-			case "invoke":
+			case "theme":
+				webviewMessage = {
+					type: "theme",
+					text: message.text,
+				}
+				break
+			case "queueOperation":
+				webviewMessage = {
+					type: "queueOperation",
+					queueOperation: message.action as "cancelItem" | "clearQueue",
+				}
+				break
+			case "action":
 				webviewMessage = {
 					type: "getLatestState",
-					text: message.text,
 				}
 				break
 			case "selectedImages":
 				webviewMessage = {
-					type: "getLatestState",
+					type: "selectedImages",
 					images: message.images,
 				}
 				break
-			case "openRouterModels":
 			case "ollamaModels":
-			case "lmStudioModels":
-			case "vsCodeLmModels":
-				// These model updates trigger a state refresh
-				await this.postStateToWebview()
 				webviewMessage = {
-					type: "getLatestState",
+					type: "ollamaModels",
+					ollamaModels: message.ollamaModels,
+				}
+				break
+			case "lmStudioModels":
+				webviewMessage = {
+					type: "lmStudioModels",
+					lmStudioModels: message.lmStudioModels,
+				}
+				break
+			case "vsCodeLmModels":
+				webviewMessage = {
+					type: "vsCodeLmModels",
+					vsCodeLmModels: message.vsCodeLmModels,
+				}
+				break
+			case "openRouterModels":
+				webviewMessage = {
+					type: "openRouterModels",
+					openRouterModels: message.openRouterModels,
+				}
+				break
+			case "openAiModels":
+				webviewMessage = {
+					type: "openAiModels",
+					openAiModels: message.openAiModels,
+				}
+				break
+			case "mcpServers":
+				webviewMessage = {
+					type: "mcpServers",
+					mcpServers: message.mcpServers,
 				}
 				break
 			default:
-				// For all other messages, trigger a state refresh
 				webviewMessage = {
 					type: "getLatestState",
 				}
 		}
 
 		if (this.AutoDev?.messageQueue) {
+			this.outputChannel.appendLine(`[AutoDevProvider] Queueing message: ${webviewMessage.type}`)
 			await this.AutoDev.messageQueue.enqueue(webviewMessage)
 		} else {
 			// Fallback to direct posting if queue not available
-			await this.view?.webview.postMessage(webviewMessage)
+			this.outputChannel.appendLine(`[AutoDevProvider] Direct posting message: ${webviewMessage.type}`)
+			if (!this.view) {
+				this.outputChannel.appendLine("[AutoDevProvider] No webview available")
+				return
+			}
+			try {
+				await this.view.webview.postMessage(webviewMessage)
+			} catch (error) {
+				this.outputChannel.appendLine(`[AutoDevProvider] Post failed: ${error.message}`)
+			}
 		}
 	}
 
@@ -357,9 +399,6 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 		const scriptUri = getUri(webview, this.context.extensionUri, ["webview-ui", "build", "static", "js", "main.js"])
 
 		// The codicon font from the React build output
-		// https://github.com/microsoft/vscode-extension-samples/blob/main/webview-codicons-sample/src/extension.ts
-		// we installed this package in the extension so that we can access it how its intended from the extension (the font file is likely bundled in vscode), and we just import the css fileinto our react app we don't have access to it
-		// don't forget to add font-src ${webview.cspSource};
 		const codiconsUri = getUri(webview, this.context.extensionUri, [
 			"node_modules",
 			"@vscode",
@@ -368,47 +407,87 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 			"codicon.css",
 		])
 
-		// const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "main.js"))
+		this.outputChannel.appendLine(`Generated URIs:`)
+		this.outputChannel.appendLine(`Styles: ${stylesUri}`)
+		this.outputChannel.appendLine(`Script: ${scriptUri}`)
+		this.outputChannel.appendLine(`Codicons: ${codiconsUri}`)
 
-		// const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "reset.css"))
-		// const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "vscode.css"))
-
-		// // Same for stylesheet
-		// const stylesheetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "assets", "main.css"))
-
-		// Use a nonce to only allow a specific script to be run.
-		/*
-        content security policy of your webview to only allow scripts that have a specific nonce
-        create a content security policy meta tag so that only loading scripts with a nonce is allowed
-        As your extension grows you will likely want to add custom styles, fonts, and/or images to your webview. If you do, you will need to update the content security policy meta tag to explicity allow for these resources. E.g.
-                <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; font-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';">
-		- 'unsafe-inline' is required for styles due to vscode-webview-toolkit's dynamic style injection
-		- since we pass base64 images to the webview, we need to specify img-src ${webview.cspSource} data:;
-
-        in meta tag we add nonce attribute: A cryptographic nonce (only used once) to allow scripts. The server must generate a unique nonce value each time it transmits a policy. It is critical to provide a nonce that cannot be guessed as bypassing a resource's policy is otherwise trivial.
-        */
 		const nonce = getNonce()
 
-		// Tip: Install the es6-string-html VS Code extension to enable code highlighting below
-		return /*html*/ `
+		const html = /*html*/ `
         <!DOCTYPE html>
         <html lang="en">
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
             <meta name="theme-color" content="#000000">
-            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}';">
+            <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' ${webview.cspSource} https:; connect-src 'self' ${webview.cspSource} https:;">
             <link rel="stylesheet" type="text/css" href="${stylesUri}">
 			<link href="${codiconsUri}" rel="stylesheet" />
             <title>AutoDev</title>
           </head>
           <body>
             <noscript>You need to enable JavaScript to run this app.</noscript>
+            <!-- Debug info -->
+            <div id="debug" style="display: none">
+              <p>Styles URI: ${stylesUri}</p>
+              <p>Script URI: ${scriptUri}</p>
+              <p>Codicons URI: ${codiconsUri}</p>
+            </div>
             <div id="root"></div>
+            <script nonce="${nonce}">
+              try {
+                // Debug logging
+                console.log('Webview initializing...');
+                console.log('Styles URI:', '${stylesUri}');
+                console.log('Script URI:', '${scriptUri}');
+                console.log('Codicons URI:', '${codiconsUri}');
+                
+                // Check if acquireVsCodeApi is available
+                console.log('acquireVsCodeApi available:', typeof acquireVsCodeApi === 'function');
+                
+                // Log any script load errors
+                window.onerror = function(msg, url, line, col, error) {
+                  console.error('Script error:', msg);
+                  console.error('URL:', url);
+                  console.error('Line:', line);
+                  console.error('Column:', col);
+                  console.error('Error object:', error);
+                  
+                  // Add error to the debug div
+                  const debugDiv = document.getElementById('debug');
+                  if (debugDiv) {
+                    debugDiv.style.display = 'block';
+                    debugDiv.innerHTML += '<p>Error: ' + msg + '</p>';
+                  }
+                };
+
+                // Add load event listeners
+                window.addEventListener('load', function() {
+                  console.log('Window loaded');
+                  const root = document.getElementById('root');
+                  if (root) {
+                    console.log('Root element:', root);
+                    console.log('Root innerHTML:', root.innerHTML);
+                  } else {
+                    console.error('Root element not found');
+                  }
+                });
+
+                document.addEventListener('DOMContentLoaded', function() {
+                  console.log('DOM content loaded');
+                });
+              } catch (error) {
+                console.error('Error in initialization script:', error);
+              }
+            </script>
             <script nonce="${nonce}" src="${scriptUri}"></script>
           </body>
         </html>
       `
+
+		this.outputChannel.appendLine("Generated HTML content")
+		return html
 	}
 
 	/**
@@ -420,9 +499,11 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 	private setWebviewMessageListener(webview: vscode.Webview) {
 		webview.onDidReceiveMessage(
 			async (message: WebviewMessage) => {
+				this.outputChannel.appendLine(`Received message from webview: ${message.type}`)
 				switch (message.type) {
 					case "webviewDidLaunch":
-						this.postStateToWebview()
+						this.outputChannel.appendLine("Webview launched, posting initial state")
+						await this.postStateToWebview()
 						this.workspaceTracker?.initializeFilePaths() // don't await
 						getTheme().then((theme) =>
 							this.postMessageToWebview({
@@ -1311,8 +1392,24 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 	}
 
 	async postStateToWebview() {
+		// Only post state if we have a view to post to
+		if (!this.view) {
+			this.outputChannel.appendLine("[AutoDevProvider] No webview available for state update")
+			return
+		}
+
+		this.outputChannel.appendLine("[AutoDevProvider] Getting state to post")
 		const state = await this.getStateToPostToWebview()
-		this.postMessageToWebview({ type: "state", state })
+		this.outputChannel.appendLine(
+			`[AutoDevProvider] State summary: version=${state.version}, messages=${state.autoDevMessages?.length || 0}, history=${state.taskHistory?.length || 0}`,
+		)
+
+		// Post directly to webview without queueing
+		try {
+			await this.view.webview.postMessage({ type: "getLatestState", ...state })
+		} catch (error) {
+			this.outputChannel.appendLine(`[AutoDevProvider] Failed to post state: ${error.message}`)
+		}
 	}
 
 	async getStateToPostToWebview(): Promise<ExtensionState> {

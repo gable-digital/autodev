@@ -4,6 +4,13 @@ import "./index.css"
 import App from "./App"
 import reportWebVitals from "./reportWebVitals"
 import "../../node_modules/@vscode/codicons/dist/codicon.css"
+import { vscode } from "./utils/vscode"
+
+// Initialize VSCode API after a short delay to ensure it's ready
+setTimeout(() => {
+	console.log("Attempting to initialize VSCode API")
+	vscode.initialize()
+}, 100)
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement)
 root.render(

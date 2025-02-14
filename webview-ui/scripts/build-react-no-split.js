@@ -109,8 +109,9 @@ config.optimization.splitChunks = {
 config.optimization.runtimeChunk = false
 
 // Rename main.{hash}.js to main.js
-config.output.filename = "static/js/[name].js"
+config.output.filename = "./static/js/[name].js"
+config.output.publicPath = "./"
 
 // Rename main.{hash}.css to main.css
-config.plugins[5].options.filename = "static/css/[name].css"
-config.plugins[5].options.moduleFilename = () => "static/css/main.css"
+config.plugins[5].options.filename = "./static/css/[name].css"
+config.plugins[5].options.moduleFilename = () => "./static/css/main.css"

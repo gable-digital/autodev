@@ -17,8 +17,24 @@ class VSCodeAPIWrapper {
 		// Check if the acquireVsCodeApi function exists in the current development
 		// context (i.e. VS Code development window or web browser)
 		if (typeof acquireVsCodeApi === "function") {
+			console.log("Acquiring VSCode API")
 			this.vsCodeApi = acquireVsCodeApi()
+			console.log("VSCode API acquired:", !!this.vsCodeApi)
+		} else {
+			console.warn("acquireVsCodeApi not available")
 		}
+	}
+
+	public initialize() {
+		if (this.vsCodeApi) {
+			console.log("Initializing VSCode API wrapper")
+			// Notify extension that webview is ready
+			this.postMessage({ type: "webviewDidLaunch" })
+			console.log("webviewDidLaunch message sent")
+			return true
+		}
+		console.warn("VSCode API not available for initialization")
+		return false
 	}
 
 	/**

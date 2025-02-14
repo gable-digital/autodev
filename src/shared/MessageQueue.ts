@@ -201,11 +201,13 @@ export class MessageQueue extends EventEmitter {
 		this.emit(QueueEvent.PROCESSING_COMPLETED, item)
 		this.emit(QueueEvent.STATE_CHANGED, this.getState())
 
+		// Add a small delay before processing the next item to prevent tight loops
 		if (this.state.items.length === 0) {
 			this.emit(QueueEvent.QUEUE_EMPTY)
 		} else {
-			// Process next item
-			this.processNext()
+			setTimeout(() => {
+				this.processNext()
+			}, 100)
 		}
 	}
 

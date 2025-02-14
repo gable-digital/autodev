@@ -731,7 +731,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	return (
 		<div
 			style={{
-				position: "fixed",
+				position: "absolute",
 				top: 0,
 				left: 0,
 				right: 0,
@@ -739,6 +739,10 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 				display: isHidden ? "none" : "flex",
 				flexDirection: "column",
 				overflow: "hidden",
+				backgroundColor: "var(--vscode-editor-background)",
+				color: "var(--vscode-editor-foreground)",
+				visibility: "visible",
+				zIndex: 1,
 			}}>
 			{task ? (
 				<>
