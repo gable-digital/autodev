@@ -7,7 +7,7 @@ import type { QueueItem } from "../../../src/shared/QueueTypes"
 /**
  * QueueStatusDisplay component provides a visual interface for the instruction queue system.
  * It displays queue statistics, item status, processing times, and relationships between items.
- * 
+ *
  * Features:
  * - Real-time queue statistics (total, processing, completed, failed)
  * - Individual item status with priority levels
@@ -15,10 +15,10 @@ import type { QueueItem } from "../../../src/shared/QueueTypes"
  * - Parent-child relationship visualization
  * - Error messages and retry count display
  * - Scrollable queue list with custom styling
- * 
+ *
  * The component automatically updates when the queue state changes through the ExtensionState context.
  * It provides user interaction through cancel buttons for pending items.
- * 
+ *
  * @returns React component or null if queue is empty
  */
 export const QueueStatusDisplay: React.FC = () => {
@@ -42,7 +42,7 @@ export const QueueStatusDisplay: React.FC = () => {
 	 * Calculates and formats the processing time for a queue item.
 	 * For completed items, shows total processing time.
 	 * For active items, shows current running time.
-	 * 
+	 *
 	 * @param item Queue item to calculate time for
 	 * @returns Formatted time string or null if no time available
 	 */
@@ -64,16 +64,10 @@ export const QueueStatusDisplay: React.FC = () => {
 					<span>Total: {queueState.items.length}</span>
 					<span>Processing: {queueState.isProcessing ? 1 : 0}</span>
 					<span>Completed: {queueState.stats.totalProcessed}</span>
-					{queueState.stats.totalFailed > 0 && (
-						<ErrorStat>Failed: {queueState.stats.totalFailed}</ErrorStat>
-					)}
-					{queueState.stats.totalRetries > 0 && (
-						<RetryStat>Retries: {queueState.stats.totalRetries}</RetryStat>
-					)}
+					{queueState.stats.totalFailed > 0 && <ErrorStat>Failed: {queueState.stats.totalFailed}</ErrorStat>}
+					{queueState.stats.totalRetries > 0 && <RetryStat>Retries: {queueState.stats.totalRetries}</RetryStat>}
 					{queueState.stats.averageProcessingTime > 0 && (
-						<TimeStat>
-							Avg Time: {formatTime(queueState.stats.averageProcessingTime)}
-						</TimeStat>
+						<TimeStat>Avg Time: {formatTime(queueState.stats.averageProcessingTime)}</TimeStat>
 					)}
 				</QueueStats>
 			</QueueHeader>
@@ -83,30 +77,19 @@ export const QueueStatusDisplay: React.FC = () => {
 						<ItemContent>
 							<ItemHeader>
 								<ItemStatus>{item.status}</ItemStatus>
-								{item.priority !== QueuePriority.NORMAL && (
-									<ItemPriority>{item.priority}</ItemPriority>
-								)}
-								{item.retryCount > 0 && (
-									<RetryCount>Retry {item.retryCount}</RetryCount>
-								)}
-								{item.parentId && (
-									<RelationshipTag>Sub-task</RelationshipTag>
-								)}
+								{item.priority !== QueuePriority.NORMAL && <ItemPriority>{item.priority}</ItemPriority>}
+								{item.retryCount > 0 && <RetryCount>Retry {item.retryCount}</RetryCount>}
+								{item.parentId && <RelationshipTag>Sub-task</RelationshipTag>}
 								{item.childIds.length > 0 && (
 									<RelationshipTag>Has {item.childIds.length} sub-tasks</RelationshipTag>
 								)}
 							</ItemHeader>
 							<ItemMessage>{item.message.text}</ItemMessage>
 							{item.error && <ItemError>{item.error}</ItemError>}
-							{getProcessingTime(item) && (
-								<ItemTime>Time: {getProcessingTime(item)}</ItemTime>
-							)}
+							{getProcessingTime(item) && <ItemTime>Time: {getProcessingTime(item)}</ItemTime>}
 						</ItemContent>
 						{item.status === QueueItemStatus.PENDING && (
-							<CancelButton
-								onClick={() => cancelQueueItem(item.id)}
-								title="Cancel this instruction"
-							>
+							<CancelButton onClick={() => cancelQueueItem(item.id)} title="Cancel this instruction">
 								✕
 							</CancelButton>
 						)}
@@ -181,7 +164,7 @@ const QueueItems = styled.div`
 `
 
 interface QueueItemProps {
-	status: string;
+	status: string
 }
 
 const QueueItemContainer = styled.div<QueueItemProps>`
@@ -193,32 +176,32 @@ const QueueItemContainer = styled.div<QueueItemProps>`
 	border-radius: 3px;
 	background: var(--vscode-editor-background);
 	border-left: 3px solid;
-	border-left-color: ${props => {
+	border-left-color: ${(props) => {
 		switch (props.status) {
-			case 'pending':
-				return 'var(--vscode-badge-background)';
-			case 'processing':
-				return 'var(--vscode-statusBarItem-prominentBackground)';
-			case 'completed':
-				return 'var(--vscode-testing-iconPassed)';
-			case 'failed':
-				return 'var(--vscode-errorForeground)';
-			case 'retrying':
-				return 'var(--vscode-statusBarItem-warningBackground)';
-			case 'cancelled':
-				return 'var(--vscode-descriptionForeground)';
+			case "pending":
+				return "var(--vscode-badge-background)"
+			case "processing":
+				return "var(--vscode-statusBarItem-prominentBackground)"
+			case "completed":
+				return "var(--vscode-testing-iconPassed)"
+			case "failed":
+				return "var(--vscode-errorForeground)"
+			case "retrying":
+				return "var(--vscode-statusBarItem-warningBackground)"
+			case "cancelled":
+				return "var(--vscode-descriptionForeground)"
 			default:
-				return 'var(--vscode-badge-background)';
+				return "var(--vscode-badge-background)"
 		}
 	}};
-	opacity: ${props => {
+	opacity: ${(props) => {
 		switch (props.status) {
-			case 'completed':
-				return 0.7;
-			case 'cancelled':
-				return 0.5;
+			case "completed":
+				return 0.7
+			case "cancelled":
+				return 0.5
 			default:
-				return 1;
+				return 1
 		}
 	}};
 `

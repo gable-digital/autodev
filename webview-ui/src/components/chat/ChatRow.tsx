@@ -205,8 +205,8 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 					<span style={{ color: normalColor, fontWeight: "bold" }}>
 						{message.type === "ask" ? (
 							<>
-								AutoDev wants to {mcpServerUse.type === "use_mcp_tool" ? "use a tool" : "access a resource"} on the{" "}
-								<code>{mcpServerUse.serverName}</code> MCP server:
+								AutoDev wants to {mcpServerUse.type === "use_mcp_tool" ? "use a tool" : "access a resource"} on
+								the <code>{mcpServerUse.serverName}</code> MCP server:
 							</>
 						) : (
 							<>
@@ -365,7 +365,9 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 						<div style={headerStyle}>
 							{toolIcon("new-file")}
 							<span style={{ fontWeight: "bold" }}>
-								{message.type === "ask" ? "AutoDev wants to create a new file:" : "AutoDev is creating a new file:"}
+								{message.type === "ask"
+									? "AutoDev wants to create a new file:"
+									: "AutoDev is creating a new file:"}
 							</span>
 						</div>
 						<CodeAccordian

@@ -30,8 +30,8 @@ const Announcement = ({ version, hideAnnouncement }: AnnouncementProps) => {
 			</h3>
 			<ul style={{ margin: "0 0 8px", paddingLeft: "12px" }}>
 				<li>
-					<b>Plan/Act mode toggle:</b> Plan mode turns AutoDev into an architect that gathers information, asks clarifying
-					questions, and designs a solution. Switch back to Act mode to let him execute the plan!{" "}
+					<b>Plan/Act mode toggle:</b> Plan mode turns AutoDev into an architect that gathers information, asks
+					clarifying questions, and designs a solution. Switch back to Act mode to let him execute the plan!{" "}
 					<VSCodeLink href="https://x.com/sdrzn/status/1881761978986934582" style={{ display: "inline" }}>
 						See a demo here.
 					</VSCodeLink>

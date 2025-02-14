@@ -103,7 +103,10 @@ export const ExtensionStateContextProvider: React.FC<{
 				const partialMessage = message.partialMessage!
 				setState((prevState) => {
 					// worth noting it will never be possible for a more up-to-date message to be sent here or in normal messages post since the presentAssistantContent function uses lock
-					const lastIndex = findLastIndex(prevState.autoDevMessages, (msg: AutoDevMessage) => msg.ts === partialMessage.ts)
+					const lastIndex = findLastIndex(
+						prevState.autoDevMessages,
+						(msg: AutoDevMessage) => msg.ts === partialMessage.ts,
+					)
 					if (lastIndex !== -1) {
 						const newMessages = [...prevState.autoDevMessages]
 						newMessages[lastIndex] = partialMessage
@@ -131,9 +134,9 @@ export const ExtensionStateContextProvider: React.FC<{
 				break
 			}
 			case "queueOperation": {
-				setState(prevState => ({
+				setState((prevState) => ({
 					...prevState,
-					queueState: message.state?.queueState
+					queueState: message.state?.queueState,
 				}))
 				break
 			}
@@ -170,11 +173,12 @@ export const ExtensionStateContextProvider: React.FC<{
 				...prevState,
 				shouldShowAnnouncement: value,
 			})),
-		cancelQueueItem: (id) => vscode.postMessage({ 
-			type: "queueOperation", 
-			queueOperation: "cancelItem", 
-			text: id 
-		}),
+		cancelQueueItem: (id) =>
+			vscode.postMessage({
+				type: "queueOperation",
+				queueOperation: "cancelItem",
+				text: id,
+			}),
 	}
 
 	return <ExtensionStateContext.Provider value={contextValue}>{children}</ExtensionStateContext.Provider>

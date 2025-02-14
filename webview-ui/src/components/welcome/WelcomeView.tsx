@@ -87,8 +87,8 @@ const WelcomeView = () => {
 					) : (
 						<>
 							<p style={{ margin: 0, marginBottom: "8px" }}>
-								While AutoDev currently requires you bring your own API key, we are working on an official accounts
-								system with additional capabilities. Subscribe to our mailing list to get updates!
+								While AutoDev currently requires you bring your own API key, we are working on an official
+								accounts system with additional capabilities. Subscribe to our mailing list to get updates!
 							</p>
 							<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
 								<VSCodeTextField

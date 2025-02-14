@@ -806,9 +806,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 										<VSCodeButton onClick={handlePrimaryButtonClick}>{primaryButtonText}</VSCodeButton>
 									)}
 									{secondaryButtonText && (
-										<VSCodeButton
-											appearance="secondary"
-											onClick={handleSecondaryButtonClick}>
+										<VSCodeButton appearance="secondary" onClick={handleSecondaryButtonClick}>
 											{secondaryButtonText}
 										</VSCodeButton>
 									)}
@@ -845,9 +843,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 										<VSCodeButton onClick={handlePrimaryButtonClick}>{primaryButtonText}</VSCodeButton>
 									)}
 									{secondaryButtonText && (
-										<VSCodeButton
-											appearance="secondary"
-											onClick={handleSecondaryButtonClick}>
+										<VSCodeButton appearance="secondary" onClick={handleSecondaryButtonClick}>
 											{secondaryButtonText}
 										</VSCodeButton>
 									)}

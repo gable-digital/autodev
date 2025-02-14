@@ -113,7 +113,8 @@ const McpView = ({ onDone }: McpViewProps) => {
 					<VSCodeLink href="https://github.com/modelcontextprotocol/servers" style={{ display: "inline" }}>
 						community-made servers
 					</VSCodeLink>{" "}
-					or ask AutoDev to create new tools specific to your workflow (e.g., "add a tool that gets the latest npm docs").{" "}
+					or ask AutoDev to create new tools specific to your workflow (e.g., "add a tool that gets the latest npm
+					docs").{" "}
 					<VSCodeLink href="https://x.com/sdrzn/status/1867271665086074969" style={{ display: "inline" }}>
 						See a demo here.
 					</VSCodeLink>

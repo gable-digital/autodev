@@ -284,48 +284,48 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 	// Send any JSON serializable data to the react app
 	async postMessageToWebview(message: ExtensionMessage) {
 		// Convert ExtensionMessage to WebviewMessage
-		let webviewMessage: WebviewMessage;
+		let webviewMessage: WebviewMessage
 
 		switch (message.type) {
 			case "queueOperation":
 				webviewMessage = {
 					type: "queueOperation",
-					queueOperation: message.action as "cancelItem" | "clearQueue"
-				};
-				break;
+					queueOperation: message.action as "cancelItem" | "clearQueue",
+				}
+				break
 			case "state":
 				webviewMessage = {
 					type: "getLatestState",
-					...message.state
-				};
-				break;
+					...message.state,
+				}
+				break
 			case "invoke":
 				webviewMessage = {
 					type: "getLatestState",
-					text: message.text
-				};
-				break;
+					text: message.text,
+				}
+				break
 			case "selectedImages":
 				webviewMessage = {
 					type: "getLatestState",
-					images: message.images
-				};
-				break;
+					images: message.images,
+				}
+				break
 			case "openRouterModels":
 			case "ollamaModels":
 			case "lmStudioModels":
 			case "vsCodeLmModels":
 				// These model updates trigger a state refresh
-				await this.postStateToWebview();
+				await this.postStateToWebview()
 				webviewMessage = {
-					type: "getLatestState"
-				};
-				break;
+					type: "getLatestState",
+				}
+				break
 			default:
 				// For all other messages, trigger a state refresh
 				webviewMessage = {
-					type: "getLatestState"
-				};
+					type: "getLatestState",
+				}
 		}
 
 		if (this.AutoDev?.messageQueue) {
@@ -1333,7 +1333,9 @@ export class AutoDevProvider implements vscode.WebviewViewProvider {
 			apiConfiguration,
 			customInstructions,
 			uriScheme: vscode.env.uriScheme,
-			currentTaskItem: this.AutoDev?.taskId ? (taskHistory || []).find((item) => item.id === this.AutoDev?.taskId) : undefined,
+			currentTaskItem: this.AutoDev?.taskId
+				? (taskHistory || []).find((item) => item.id === this.AutoDev?.taskId)
+				: undefined,
 			checkpointTrackerErrorMessage: this.AutoDev?.checkpointTrackerErrorMessage,
 			autoDevMessages: this.AutoDev?.AutoDevMessages || [],
 			taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),

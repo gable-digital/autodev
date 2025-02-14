@@ -509,7 +509,10 @@ export class AutoDev {
 		}
 
 		// Get last task completed
-		const lastTaskCompletedMessage = findLast(this.AutoDevMessages.slice(0, messageIndex), (m) => m.say === "completion_result")
+		const lastTaskCompletedMessage = findLast(
+			this.AutoDevMessages.slice(0, messageIndex),
+			(m) => m.say === "completion_result",
+		)
 
 		try {
 			// Get changed files between current state and commit
@@ -822,8 +825,7 @@ export class AutoDev {
 		// This is important in case the user deletes messages without resuming the task first
 		this.apiConversationHistory = await this.getSavedApiConversationHistory()
 
-		const lastAutoDevMessage = this.AutoDevMessages
-			.slice()
+		const lastAutoDevMessage = this.AutoDevMessages.slice()
 			.reverse()
 			.find((m) => !(m.ask === "resume_task" || m.ask === "resume_completed_task")) // could be multiple resume tasks
 		// const lastAutoDevMessage = this.AutoDevMessages[lastAutoDevMessageIndex]
@@ -2673,7 +2675,10 @@ export class AutoDev {
 							// Add newchanges flag if there are new changes to the workspace
 
 							const hasNewChanges = await this.doesLatestTaskCompletionHaveNewChanges()
-							const lastCompletionResultMessage = findLast(this.AutoDevMessages, (m) => m.say === "completion_result")
+							const lastCompletionResultMessage = findLast(
+								this.AutoDevMessages,
+								(m) => m.say === "completion_result",
+							)
 							if (
 								lastCompletionResultMessage &&
 								hasNewChanges &&
