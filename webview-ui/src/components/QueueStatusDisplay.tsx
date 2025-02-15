@@ -1,8 +1,8 @@
 import React from "react"
 import styled from "styled-components"
 import { useExtensionState } from "../context/ExtensionStateContext"
-import { QueueItemStatus, QueuePriority } from "../../../src/shared/QueueTypes"
-import type { QueueItem } from "../../../src/shared/QueueTypes"
+import { QueueItemStatus, QueuePriority } from "../shared/QueueTypes"
+import type { QueueItem } from "../shared/QueueTypes"
 
 /**
  * QueueStatusDisplay component provides a visual interface for the instruction queue system.

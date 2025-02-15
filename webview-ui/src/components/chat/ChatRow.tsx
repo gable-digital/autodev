@@ -10,8 +10,8 @@ import {
 	AutoDevSayTool,
 	COMPLETION_RESULT_CHANGES_FLAG,
 	ExtensionMessage,
-} from "../../../../src/shared/ExtensionMessage"
-import { COMMAND_OUTPUT_STRING, COMMAND_REQ_APP_STRING } from "../../../../src/shared/combineCommandSequences"
+} from "../../shared/ExtensionMessage"
+import { COMMAND_OUTPUT_STRING, COMMAND_REQ_APP_STRING } from "../../shared/combineCommandSequences"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import { findMatchingResourceOrTemplate } from "../../utils/mcp"
 import { vscode } from "../../utils/vscode"

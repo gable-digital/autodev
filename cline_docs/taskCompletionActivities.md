@@ -18,7 +18,12 @@ Before ANY task can be considered complete, you MUST verify:
    - Use appropriate testing tools:
      - Unit tests for business logic
      - Integration tests for system components
-     - UI testing for user interfaces
+     - UI testing with Playwright:
+       - Component positioning and layout
+       - Visual regression testing
+       - Browser automation
+       - Screenshot comparisons
+       - Debug mode testing
      - Manual testing when necessary
    - Queue-specific testing:
      - Message queue operations work correctly

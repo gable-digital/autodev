@@ -11,11 +11,11 @@ import {
 	AutoDevSayBrowserAction,
 	AutoDevSayTool,
 	ExtensionMessage,
-} from "../../../../src/shared/ExtensionMessage"
-import { findLast } from "../../../../src/shared/array"
-import { combineApiRequests } from "../../../../src/shared/combineApiRequests"
-import { combineCommandSequences } from "../../../../src/shared/combineCommandSequences"
-import { getApiMetrics } from "../../../../src/shared/getApiMetrics"
+} from "../../shared/ExtensionMessage"
+import { findLast } from "../../shared/array"
+import { combineApiRequests } from "../../shared/combineApiRequests"
+import { combineCommandSequences } from "../../shared/combineCommandSequences"
+import { getApiMetrics } from "../../shared/getApiMetrics"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import { vscode } from "../../utils/vscode"
 import HistoryPreview from "../history/HistoryPreview"
@@ -49,7 +49,8 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 	const lastApiReqTotalTokens = useMemo(() => {
 		const getTotalTokensFromApiReqMessage = (msg: AutoDevMessage) => {
 			if (!msg.text) return 0
-			const { tokensIn, tokensOut, cacheWrites, cacheReads }: AutoDevApiReqInfo = JSON.parse(msg.text)
+			const info = JSON.parse(msg.text) as AutoDevApiReqInfo
+			const { tokensIn, tokensOut, cacheWrites, cacheReads } = info
 			return (tokensIn || 0) + (tokensOut || 0) + (cacheWrites || 0) + (cacheReads || 0)
 		}
 		const lastApiReqMessage = findLast(modifiedMessages, (msg) => {
@@ -493,7 +494,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 		})
 	}, [modifiedMessages])
 
-	const isBrowserSessionMessage = (message: AutoDevMessage): boolean => {
+	const isBrowserSessionMessage = (message: AutoDevMessage & { ask?: string; say?: string }): boolean => {
 		// which of visible messages are browser session messages, see above
 		if (message.type === "ask") {
 			return ["browser_action_launch"].includes(message.ask!)
@@ -533,7 +534,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 					// get last api_req_started in currentGroup to check if it's cancelled. If it is then this api req is not part of the current browser session
 					const lastApiReqStarted = [...currentGroup].reverse().find((m) => m.say === "api_req_started")
 					if (lastApiReqStarted?.text != null) {
-						const info = JSON.parse(lastApiReqStarted.text)
+						const info = JSON.parse(lastApiReqStarted.text) as { cancelReason?: string }
 						const isCancelled = info.cancelReason != null
 						if (isCancelled) {
 							endBrowserSession()
@@ -779,7 +780,18 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 							itemContent={itemContent}
 						/>
 					</div>
-					<div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "8px 16px" }}>
+					<div
+						className="chat-input-container"
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: 8,
+							padding: "8px 16px",
+							marginTop: "auto",
+							width: "100%",
+							backgroundColor: "var(--vscode-editor-background)",
+							borderTop: "1px solid var(--vscode-panel-border)",
+						}}>
 						{showScrollToBottom && (
 							<VSCodeButton
 								appearance="secondary"
@@ -791,7 +803,13 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 								Scroll to Bottom
 							</VSCodeButton>
 						)}
-						<div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+						<div
+							style={{
+								display: "flex",
+								gap: 8,
+								alignItems: "flex-end",
+								width: "100%",
+							}}>
 							<ChatTextArea
 								ref={textAreaRef}
 								inputValue={inputValue}

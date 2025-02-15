@@ -246,7 +246,57 @@
 
 ## Testing Patterns
 
-### 1. Component Testing
+### 1. UI Testing with Playwright
+- **Decision**: Use Playwright for automated UI testing
+- **Rationale**: Provides reliable browser automation and visual testing
+- **Implementation**:
+  ```typescript
+  test('chat input should be positioned correctly', async ({ page }) => {
+    // Launch extension
+    await page.goto('http://localhost:3000');
+    
+    // Wait for chat view
+    await page.waitForSelector('.chat-input-container');
+
+    // Get chat input container
+    const chatInputContainer = await page.locator('.chat-input-container').first();
+    
+    // Verify positioning
+    const box = await chatInputContainer.boundingBox();
+    const containerBottom = box ? box.y + box.height : 0;
+    const viewportHeight = page.viewportSize()?.height || 0;
+    expect(Math.abs(containerBottom - viewportHeight)).toBeLessThan(100);
+    
+    // Visual regression testing
+    await expect(page).toHaveScreenshot('chat-view.png', {
+      mask: [page.locator('.codicon')],
+      maxDiffPixelRatio: 0.01
+    });
+  });
+  ```
+
+### 2. File Organization Pattern
+- **Decision**: Shared code moved to webview-ui/src/shared
+- **Rationale**: Better code organization and import management
+- **Implementation**:
+  ```
+  webview-ui/src/
+  ├── shared/           # Shared code between extension and webview
+  │   ├── ExtensionMessage.ts
+  │   ├── WebviewMessage.ts
+  │   ├── QueueTypes.ts
+  │   ├── array.ts
+  │   ├── BrowserSettings.ts
+  │   ├── context-mentions.ts
+  │   ├── combineApiRequests.ts
+  │   ├── combineCommandSequences.ts
+  │   └── getApiMetrics.ts
+  ├── components/       # React components
+  ├── context/         # React context providers
+  └── utils/           # Utility functions
+  ```
+
+### 3. Component Testing
 - Unit tests for message handlers
 - Integration tests for state management
 - End-to-end tests for full workflows

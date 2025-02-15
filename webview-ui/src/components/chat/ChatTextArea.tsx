@@ -3,7 +3,7 @@ import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, us
 import DynamicTextArea from "react-textarea-autosize"
 import { useClickAway, useWindowSize } from "react-use"
 import styled from "styled-components"
-import { mentionRegex, mentionRegexGlobal } from "../../../../src/shared/context-mentions"
+import { mentionRegex, mentionRegexGlobal } from "../../shared/context-mentions"
 import { useExtensionState } from "../../context/ExtensionStateContext"
 import {
 	ContextMenuOptionType,

@@ -1,22 +1,34 @@
 # Active Context
 
 ## Current Task
-Implementing instruction queuing system to allow users to enter follow-up instructions while the extension is processing API calls, editing files, or thinking.
+Fixing chat box positioning and implementing UI testing framework. This includes:
+1. Fixing chat box layout issues:
+   - Chat box showing at top instead of bottom
+   - Not taking full width as designed
+2. Implementing comprehensive UI testing:
+   - Setting up Playwright for browser automation
+   - Adding visual regression testing
+   - Supporting VSCode debug mode testing
 
 ### Required Pre-Implementation File Review
-1. Message Processing Files:
-   - `src/core/sliding-window/index.ts`: Check for existing queue-like implementations
-   - `src/core/assistant-message/index.ts`: Understand message processing flow
-   - `src/core/assistant-message/parse-assistant-message.ts`: Review message parsing
-   - `src/services/llm-access-control/`: Review rate limiting/queuing
-   - `src/shared/combineApiRequests.ts`: Check request combination logic
-   - `src/shared/combineCommandSequences.ts`: Review command sequencing
+1. UI Component Files:
+   - `webview-ui/src/components/chat/ChatView.tsx`: Main chat interface to fix
+   - `webview-ui/src/App.tsx`: Parent component managing layout
+   - `webview-ui/src/index.css`: Global styles
+   - `webview-ui/src/components/chat/ChatTextArea.tsx`: Chat input component
+   - `webview-ui/src/components/chat/ChatRow.tsx`: Chat message display
 
 2. Test Implementation Files:
-   - `src/test/extension.test.ts`: Review test patterns
-   - `src/api/retry.test.ts`: Study retry mechanism tests
-   - `src/utils/cost.test.ts`: Examine test structure
-   - `src/shared/array.test.ts`: Review array utility tests
+   - `webview-ui/src/components/QueueStatusDisplay.test.tsx`: Example React component test
+   - `src/test/extension.test.ts`: Extension test setup patterns
+   - `src/test/webview/`: Webview test directory
+   - `webview-ui/setupTests.js`: Test setup configuration
+   - `webview-ui/matchMedia.js`: Browser API mocks
+
+3. Build Configuration Files:
+   - `webview-ui/package.json`: UI dependencies and scripts
+   - `webview-ui/vite.config.js`: Build configuration
+   - `.vscode/launch.json`: Debug configuration
 
 ### Investigation Findings
 
@@ -243,18 +255,15 @@ Evaluating Firebase Authentication usage in the extension after forking to GDS A
 
 ## Current Status
 ✅ Completed investigation of current implementation
-✅ Identified key files and components
-✅ Documented message flow and bottlenecks
+✅ Analyzed existing test infrastructure
+✅ Documented chat box positioning issues
 ✅ Created detailed implementation plan
-✅ Created MessageQueue.ts and QueueTypes.ts
-✅ Implemented core queue functionality
-✅ Added queue state management
-✅ Integrated queue with AutoDevProvider
-✅ Fixed type errors in AutoDevProvider.ts
-✅ Updated message type handling
-✅ Implemented queue status display in UI
-✅ Added comprehensive tests for queue functionality
-✅ Created queue documentation
+✅ Identified testing framework requirements
+[ ] Fix chat box positioning and width
+[ ] Set up Playwright testing framework
+[ ] Create UI test suite
+[ ] Add visual regression testing
+[ ] Document testing procedures
 
 ### Recent UI Improvements
 
@@ -278,15 +287,52 @@ Evaluating Firebase Authentication usage in the extension after forking to GDS A
    - Added detailed feature documentation
 
 ## Next Actions
-1. Monitor queue performance in production
-2. Gather user feedback on queue UI
-3. Consider additional queue features:
+1. Fix chat box positioning and width issues
+   - Update ChatView.tsx styles
+   - Ensure chat input stays at bottom
+   - Make chat input full width
+   - Test in both panel and sidebar views
+2. Implement UI testing framework
+   - Set up Playwright for browser automation
+   - Configure screenshot comparison
+   - Add debug mode support
+   - Create initial UI test suite
+3. Monitor queue performance in production
+4. Gather user feedback on queue UI
+5. Consider additional queue features:
    - Queue item prioritization
    - Advanced filtering options
    - Batch operations
-4. Plan performance optimizations based on usage patterns
+6. Plan performance optimizations based on usage patterns
 
 ## Recent Changes
+
+### Chat Box Positioning Fix (2024-02-14)
+1. Identified Issues:
+   - Chat box showing at top instead of bottom
+   - Not taking full width as designed
+   - Root cause: Incorrect styling in ChatView.tsx
+   - Impact: Poor user experience and UI layout
+
+2. Required Changes:
+   - Update ChatView.tsx styles
+   - Fix positioning and width
+   - Ensure consistent behavior in both panel and sidebar
+
+3. Testing Requirements:
+   - Need automated UI testing framework
+   - Visual regression testing capability
+   - Mouse/cursor simulation support
+   - Debug mode integration
+   - Screenshot comparison functionality
+
+4. Implementation Plan:
+   - Fix ChatView.tsx styling
+   - Set up Playwright testing framework
+   - Create UI test suite
+   - Add visual regression tests
+   - Document testing procedures
+
 
 ### Webview State Hydration Fix (2024-02-14)
 1. Fixed Critical Issue:
@@ -321,6 +367,25 @@ Evaluating Firebase Authentication usage in the extension after forking to GDS A
    - Need to handle both message types
    - Proper typing for message handling
    - Importance of logging for debugging
+
+### Code Organization Update (2024-02-15)
+1. Shared Files Reorganization:
+   - Moved shared files to webview-ui/src/shared
+   - Updated import paths
+   - Improved file organization
+   - Enhanced code structure
+
+2. Testing Infrastructure:
+   - Added Playwright setup
+   - Created test configuration
+   - Added initial test cases
+   - Preparing visual regression
+
+3. Next Steps:
+   - Complete UI test suite
+   - Add visual regression
+   - Test debug mode
+   - Create documentation
 
 ### Package and Version Management (2024-02-14)
 1. Added VSIX Package Creation

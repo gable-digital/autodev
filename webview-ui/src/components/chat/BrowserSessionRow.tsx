@@ -1,22 +1,17 @@
 import deepEqual from "fast-deep-equal"
 import React, { memo, useEffect, useMemo, useRef, useState } from "react"
 import { useSize } from "react-use"
-import {
-	BrowserAction,
-	BrowserActionResult,
-	AutoDevMessage,
-	AutoDevSayBrowserAction,
-} from "../../../../src/shared/ExtensionMessage"
+import { BrowserAction, BrowserActionResult, AutoDevMessage, AutoDevSayBrowserAction } from "../../shared/ExtensionMessage"
 import { vscode } from "../../utils/vscode"
 import CodeBlock, { CODE_BLOCK_BG_COLOR } from "../common/CodeBlock"
 import { ChatRowContent, ProgressIndicator } from "./ChatRow"
 import { VSCodeButton } from "@vscode/webview-ui-toolkit/react"
 import styled from "styled-components"
 import { CheckpointControls, CheckpointOverlay } from "../common/CheckpointControls"
-import { findLast } from "../../../../src/shared/array"
+import { findLast } from "../../shared/array"
 import { BrowserSettingsMenu } from "../browser/BrowserSettingsMenu"
 import { useExtensionState } from "../../context/ExtensionStateContext"
-import { BROWSER_VIEWPORT_PRESETS } from "../../../../src/shared/BrowserSettings"
+import { BROWSER_VIEWPORT_PRESETS } from "../../shared/BrowserSettings"
 
 interface BrowserSessionRowProps {
 	messages: AutoDevMessage[]
