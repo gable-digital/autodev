@@ -42,7 +42,7 @@ export interface ExtensionMessage {
 	lmStudioModels?: string[]
 	vsCodeLmModels?: { vendor?: string; family?: string; version?: string; id?: string }[]
 	filePaths?: string[]
-	partialMessage?: ClineMessage
+	partialMessage?: AutoDevMessage
 	openRouterModels?: Record<string, ModelInfo>
 	openAiModels?: string[]
 	mcpServers?: McpServer[]
@@ -55,7 +55,7 @@ export interface ExtensionState {
 	uriScheme?: string
 	currentTaskItem?: HistoryItem
 	checkpointTrackerErrorMessage?: string
-	clineMessages: ClineMessage[]
+	autodevMessages: AutoDevMessage[]
 	taskHistory: HistoryItem[]
 	shouldShowAnnouncement: boolean
 	autoApprovalSettings: AutoApprovalSettings
@@ -69,11 +69,11 @@ export interface ExtensionState {
 	}
 }
 
-export interface ClineMessage {
+export interface AutoDevMessage {
 	ts: number
 	type: "ask" | "say"
-	ask?: ClineAsk
-	say?: ClineSay
+	ask?: AutoDevAsk
+	say?: AutoDevSay
 	text?: string
 	reasoning?: string
 	images?: string[]
@@ -83,7 +83,7 @@ export interface ClineMessage {
 	conversationHistoryDeletedRange?: [number, number] // for when conversation history is truncated for API requests
 }
 
-export type ClineAsk =
+export type AutoDevAsk =
 	| "followup"
 	| "plan_mode_response"
 	| "command"
@@ -98,7 +98,7 @@ export type ClineAsk =
 	| "browser_action_launch"
 	| "use_mcp_server"
 
-export type ClineSay =
+export type AutoDevSay =
 	| "task"
 	| "error"
 	| "api_req_started"
@@ -122,7 +122,7 @@ export type ClineSay =
 	| "diff_error"
 	| "deleted_api_reqs"
 
-export interface ClineSayTool {
+export interface AutoDevSayTool {
 	tool:
 		| "editedExistingFile"
 		| "newFileCreated"
@@ -142,7 +142,7 @@ export interface ClineSayTool {
 export const browserActions = ["launch", "click", "type", "scroll_down", "scroll_up", "close"] as const
 export type BrowserAction = (typeof browserActions)[number]
 
-export interface ClineSayBrowserAction {
+export interface AutoDevSayBrowserAction {
 	action: BrowserAction
 	coordinate?: string
 	text?: string
@@ -155,7 +155,7 @@ export type BrowserActionResult = {
 	currentMousePosition?: string
 }
 
-export interface ClineAskUseMcpServer {
+export interface AutoDevAskUseMcpServer {
 	serverName: string
 	type: "use_mcp_tool" | "access_mcp_resource"
 	toolName?: string
@@ -163,17 +163,17 @@ export interface ClineAskUseMcpServer {
 	uri?: string
 }
 
-export interface ClineApiReqInfo {
+export interface AutoDevApiReqInfo {
 	request?: string
 	tokensIn?: number
 	tokensOut?: number
 	cacheWrites?: number
 	cacheReads?: number
 	cost?: number
-	cancelReason?: ClineApiReqCancelReason
+	cancelReason?: AutoDevApiReqCancelReason
 	streamingFailedMessage?: string
 }
 
-export type ClineApiReqCancelReason = "streaming_failed" | "user_cancelled"
+export type AutoDevApiReqCancelReason = "streaming_failed" | "user_cancelled"
 
 export const COMPLETION_RESULT_CHANGES_FLAG = "HAS_CHANGES"

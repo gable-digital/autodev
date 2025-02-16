@@ -56,19 +56,15 @@ const WelcomeView = () => {
 					padding: "0 20px",
 					overflow: "auto",
 				}}>
-				<h2>Hi, I'm Cline</h2>
+				<h2>Hi, I'm AutoDev</h2>
 				<p>
-					I can do all kinds of tasks thanks to the latest breakthroughs in{" "}
-					<VSCodeLink
-						href="https://www-cdn.anthropic.com/fed9cc193a14b84131812372d8d5857f8f304c52/Model_Card_Claude_3_Addendum.pdf"
-						style={{ display: "inline" }}>
-						Claude 3.5 Sonnet's agentic coding capabilities
-					</VSCodeLink>{" "}
-					and access to tools that let me create & edit files, explore complex projects, use the browser, and execute
-					terminal commands (with your permission, of course). I can even use MCP to create new tools and extend my own
-					capabilities.
+					I am forked from the wonderful Cline project. I have been enhanced with better thought processes to reduce
+					mistakes and cut down on re-queries. I have also been modified to perform code edits more quickly, decreasing
+					the time to make changes. Because I make fewer mistakes, I also generally cost less to complete the
+					implementation of a specific feature or fix a bug. My interactivity has also been improved, providing a better
+					overall user experience. For example, you can now provide active feedback while I'm working and I will take it
+					into account on my next AI query.
 				</p>
-
 				<b>To get started, this extension needs an API provider for Claude 3.5 Sonnet.</b>
 
 				<div
@@ -87,8 +83,8 @@ const WelcomeView = () => {
 					) : (
 						<>
 							<p style={{ margin: 0, marginBottom: "8px" }}>
-								While Cline currently requires you bring your own API key, we are working on an official accounts
-								system with additional capabilities. Subscribe to our mailing list to get updates!
+								While AutoDev currently requires you bring your own API key, we are working on an official
+								accounts system with additional capabilities. Subscribe to our mailing list to get updates!
 							</p>
 							<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
 								<VSCodeTextField

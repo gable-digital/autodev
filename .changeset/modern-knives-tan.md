@@ -1,5 +1,5 @@
 ---
-"claude-dev": patch
+"gds-autodev": patch
 ---
 
 Add automatic retry for rate limited requests

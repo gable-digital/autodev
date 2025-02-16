@@ -1,7 +1,12 @@
 import deepEqual from "fast-deep-equal"
 import React, { memo, useEffect, useMemo, useRef, useState } from "react"
 import { useSize } from "react-use"
-import { BrowserAction, BrowserActionResult, ClineMessage, ClineSayBrowserAction } from "../../../../src/shared/ExtensionMessage"
+import {
+	BrowserAction,
+	BrowserActionResult,
+	AutoDevMessage,
+	AutoDevSayBrowserAction,
+} from "../../../../src/shared/ExtensionMessage"
 import { vscode } from "../../utils/vscode"
 import CodeBlock, { CODE_BLOCK_BG_COLOR } from "../common/CodeBlock"
 import { ChatRowContent, ProgressIndicator } from "./ChatRow"
@@ -14,10 +19,10 @@ import { useExtensionState } from "../../context/ExtensionStateContext"
 import { BROWSER_VIEWPORT_PRESETS } from "../../../../src/shared/BrowserSettings"
 
 interface BrowserSessionRowProps {
-	messages: ClineMessage[]
+	messages: AutoDevMessage[]
 	isExpanded: (messageTs: number) => boolean
 	onToggleExpand: (messageTs: number) => void
-	lastModifiedMessage?: ClineMessage
+	lastModifiedMessage?: AutoDevMessage
 	isLast: boolean
 	onHeightChange: (isTaller: boolean) => void
 }
@@ -57,15 +62,15 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 				screenshot?: string
 				mousePosition?: string
 				consoleLogs?: string
-				messages: ClineMessage[] // messages up to and including the result
+				messages: AutoDevMessage[] // messages up to and including the result
 			}
 			nextAction?: {
-				messages: ClineMessage[] // messages leading to next result
+				messages: AutoDevMessage[] // messages leading to next result
 			}
 		}[] = []
 
-		let currentStateMessages: ClineMessage[] = []
-		let nextActionMessages: ClineMessage[] = []
+		let currentStateMessages: AutoDevMessage[] = []
+		let nextActionMessages: AutoDevMessage[] = []
 
 		messages.forEach((message) => {
 			if (message.ask === "browser_action_launch" || message.say === "browser_action_launch") {
@@ -219,7 +224,7 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 		for (let i = actions.length - 1; i >= 0; i--) {
 			const message = actions[i]
 			if (message.say === "browser_action") {
-				const browserAction = JSON.parse(message.text || "{}") as ClineSayBrowserAction
+				const browserAction = JSON.parse(message.text || "{}") as AutoDevSayBrowserAction
 				if (browserAction.action === "click" && browserAction.coordinate) {
 					return browserAction.coordinate
 				}
@@ -264,7 +269,7 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 						}}></span>
 				)}
 				<span style={{ fontWeight: "bold" }}>
-					<>{isAutoApproved ? "Cline is using the browser:" : "Cline wants to use the browser:"}</>
+					<>{isAutoApproved ? "AutoDev is using the browser:" : "AutoDev wants to use the browser:"}</>
 				</span>
 			</div>
 			<div
@@ -442,7 +447,7 @@ const BrowserSessionRow = memo((props: BrowserSessionRowProps) => {
 }, deepEqual)
 
 interface BrowserSessionRowContentProps extends Omit<BrowserSessionRowProps, "messages"> {
-	message: ClineMessage
+	message: AutoDevMessage
 	setMaxActionHeight: (height: number) => void
 }
 
@@ -503,7 +508,7 @@ const BrowserSessionRowContent = ({
 					)
 
 				case "browser_action":
-					const browserAction = JSON.parse(message.text || "{}") as ClineSayBrowserAction
+					const browserAction = JSON.parse(message.text || "{}") as AutoDevSayBrowserAction
 					return (
 						<BrowserActionBox
 							action={browserAction.action}

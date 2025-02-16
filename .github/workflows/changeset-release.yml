@@ -1,5 +1,5 @@
 name: Changeset Release
-run-name: Changeset Release ${{ github.actor != 'cline-bot' && '- Create PR' || '- Update Changelog' }}
+run-name: Changeset Release ${{ github.actor != 'autodev-bot' && '- Create PR' || '- Update Changelog' }}
 
 permissions:
     contents: write
@@ -21,7 +21,7 @@ jobs:
             ( github.event_name == 'pull_request' &&
             github.event.pull_request.merged == true &&
             github.event.pull_request.base.ref == 'main' &&
-            github.actor != 'cline-bot' ) ||
+            github.actor != 'autodev-bot' ) ||
             github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
         permissions:
@@ -63,7 +63,7 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # Job 2: Process version bump PR created by cline-bot
+    # Job 2: Process version bump PR created by autodev-bot
     changeset-pr-edit-approve:
         name: Auto approve and merge Bump version PRs
         runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
         if: >
             github.event_name == 'pull_request' &&
             github.event.pull_request.base.ref == 'main' &&
-            github.actor == 'cline-bot' &&
+            github.actor == 'autodev-bot' &&
             contains(github.event.pull_request.title, 'Changeset version bump')
         steps:
             - name: Determine checkout ref
@@ -84,7 +84,7 @@ jobs:
                   echo "Head ref: ${{ github.head_ref }}"
                   echo "PR SHA: ${{ github.event.pull_request.head.sha }}"
 
-                  if [[ "${{ github.event.action }}" == "opened" && "${{ github.actor }}" == "cline-bot" ]]; then
+                  if [[ "${{ github.event.action }}" == "opened" && "${{ github.actor }}" == "autodev-bot" ]]; then
                     echo "Using branch ref: ${{ github.head_ref }}"  
                     echo "git_ref=${{ github.head_ref }}" >> $GITHUB_OUTPUT
                   else
@@ -122,7 +122,7 @@ jobs:
             - name: Push Changelog updates
               if: ${{ !contains(github.event.pull_request.labels.*.name, 'changelog-ready') }}
               run: |
-                  git config user.name "cline-bot"
+                  git config user.name "autodev-bot"
                   git config user.email github-actions@github.com
                   echo "Running git add and commit..."
                   git add CHANGELOG.md

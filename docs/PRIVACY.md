@@ -1,11 +1,11 @@
-# Cline Privacy Policy
+# AutoDev Privacy Policy
 
-Cline Bot Inc. ("Cline," "we," "our," and/or "us") values the privacy of individuals who use our VS Code extension and related services (collectively, our "Services"). This privacy policy explains how we collect, use, and disclose information from users of our Services.
+AutoDev Bot Inc. ("AutoDev," "we," "our," and/or "us") values the privacy of individuals who use our VS Code extension and related services (collectively, our "Services"). This privacy policy explains how we collect, use, and disclose information from users of our Services.
 
 ## Key Points
 
--   Cline operates entirely client-side as a VS Code extension
--   No code or data is collected, stored, or transmitted to Cline's servers
+-   AutoDev operates entirely client-side as a VS Code extension
+-   No code or data is collected, stored, or transmitted to AutoDev's servers
 -   Your data is only sent to your chosen AI provider (e.g., Anthropic, OpenAI) when you explicitly request assistance
 -   All processing happens locally on your machine
 -   API keys are stored securely in VS Code's built-in settings storage
@@ -19,19 +19,19 @@ Cline Bot Inc. ("Cline," "we," "our," and/or "us") values the privacy of individ
 
 ### B. Information Processing
 
-Cline functions solely as a client-side VS Code extension that facilitates communication between your editor and your chosen AI model provider:
+AutoDev functions solely as a client-side VS Code extension that facilitates communication between your editor and your chosen AI model provider:
 
 1. **File Contents**:
 
     - Only sent to your chosen AI provider when you explicitly request assistance
-    - Never stored or transmitted to Cline's servers
+    - Never stored or transmitted to AutoDev's servers
     - Only the specific files/content you select are included
 
 2. **Terminal Commands**:
 
     - Processed entirely locally on your machine
     - Require explicit user confirmation before execution
-    - No command history is transmitted to Cline
+    - No command history is transmitted to AutoDev
 
 3. **Browser Integration**:
     - Screenshots and console logs are processed locally
@@ -49,7 +49,7 @@ Cline functions solely as a client-side VS Code extension that facilitates commu
 2. **API Key Security**:
 
     - Stored using VS Code's secure settings storage system
-    - Never transmitted to Cline's servers
+    - Never transmitted to AutoDev's servers
     - You can remove/modify keys at any time
 
 3. **User Control**:
@@ -63,7 +63,7 @@ Cline functions solely as a client-side VS Code extension that facilitates commu
 When you request assistance:
 
 1. Selected content is sent directly to your chosen AI provider
-2. No data passes through Cline's servers
+2. No data passes through AutoDev's servers
 3. Provider's own privacy policy applies to this communication:
     - [Anthropic Privacy Policy](https://www.anthropic.com/privacy)
     - [OpenAI Privacy Policy](https://openai.com/privacy)
@@ -72,12 +72,12 @@ When you request assistance:
 ## Error Handling & Debugging
 
 -   Error logs are processed locally
--   No automatic error reporting to Cline
+-   No automatic error reporting to AutoDev
 -   You control what information to include when reporting issues
 
 ## Children's Privacy
 
-We do not knowingly collect, maintain, or use personal information from children under 18 years of age, and no part of our Service(s) is directed to children. If you learn that a child has provided us with personal information in violation of this Privacy Policy, then you may alert us at support@cline.bot.
+We do not knowingly collect, maintain, or use personal information from children under 18 years of age, and no part of our Service(s) is directed to children. If you learn that a child has provided us with personal information in violation of this Privacy Policy, then you may alert us at support@autodev.bot.
 
 ## Changes to Privacy Policy
 
@@ -85,7 +85,7 @@ We will post any changes to this policy on our GitHub repository. Significant ch
 
 ## Security Concerns & Auditing
 
--   Cline is open source and available for security audit
+-   AutoDev is open source and available for security audit
 -   Our client-side architecture ensures no central point of data collection
 -   You can inspect exactly what data is being sent to AI providers
 -   Enterprise users can implement additional access controls through VS Code
@@ -94,6 +94,6 @@ We will post any changes to this policy on our GitHub repository. Significant ch
 
 For privacy-related questions or concerns:
 
--   Open an issue on our [GitHub repository](https://github.com/cline/cline)
--   Join our [Discord community](https://discord.gg/cline)
--   Email: support@cline.bot
+-   Open an issue on our [GitHub repository](https://github.com/autodev/autodev)
+-   Join our [Discord community](https://discord.gg/autodev)
+-   Email: support@autodev.bot
