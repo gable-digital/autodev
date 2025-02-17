@@ -23,7 +23,6 @@ import ContextMenu from "./ContextMenu"
 interface ChatTextAreaProps {
 	inputValue: string
 	setInputValue: (value: string) => void
-	textAreaDisabled: boolean
 	placeholderText: string
 	selectedImages: string[]
 	setSelectedImages: React.Dispatch<React.SetStateAction<string[]>>
@@ -199,7 +198,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		{
 			inputValue,
 			setInputValue,
-			textAreaDisabled,
 			placeholderText,
 			selectedImages,
 			setSelectedImages,
@@ -597,7 +595,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		}, [apiConfiguration, openRouterModels])
 
 		const onModeToggle = useCallback(() => {
-			// if (textAreaDisabled) return
 			let changeModeDelay = 0
 			if (showModelSelector) {
 				// user has model selector open, so we should save it before switching modes
@@ -620,8 +617,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		}, [chatSettings.mode, showModelSelector, submitApiConfig])
 
 		const handleContextButtonClick = useCallback(() => {
-			if (textAreaDisabled) return
-
 			// Focus the textarea first
 			textAreaRef.current?.focus()
 
@@ -660,7 +655,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			} as React.ChangeEvent<HTMLTextAreaElement>
 			handleInputChange(event)
 			updateHighlights()
-		}, [inputValue, textAreaDisabled, handleInputChange, updateHighlights])
+		}, [inputValue, handleInputChange, updateHighlights])
 
 		// Use an effect to detect menu close
 		useEffect(() => {
@@ -820,7 +815,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				<div
 					style={{
 						padding: "10px 15px",
-						opacity: textAreaDisabled ? 0.5 : 1,
+						opacity: 1,
 						position: "relative",
 						display: "flex",
 					}}
@@ -888,7 +883,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							textAreaRef.current = el
 						}}
 						value={inputValue}
-						disabled={textAreaDisabled}
 						onChange={(e) => {
 							handleInputChange(e)
 							updateHighlights()
@@ -935,7 +929,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							// Instead of using boxShadow, we use a div with a border to better replicate the behavior when the textarea is focused
 							// boxShadow: "0px 0px 0px 1px var(--vscode-input-border)",
 							padding: "9px 28px 3px 9px",
-							cursor: textAreaDisabled ? "not-allowed" : undefined,
 							flex: 1,
 							zIndex: 1,
 							outline: isTextAreaFocused
@@ -989,12 +982,10 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							/> */}
 							<div
 								data-testid="send-button"
-								className={`input-icon-button ${textAreaDisabled ? "disabled" : ""} codicon codicon-send`}
+								className={`input-icon-button codicon codicon-send`}
 								onClick={() => {
-									if (!textAreaDisabled) {
-										setIsTextAreaFocused(false)
-										onSend()
-									}
+									setIsTextAreaFocused(false)
+									onSend()
 								}}
 								style={{ fontSize: 15 }}></div>
 						</div>
@@ -1007,7 +998,6 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							data-testid="context-button"
 							appearance="icon"
 							aria-label="Add Context"
-							disabled={textAreaDisabled}
 							onClick={handleContextButtonClick}
 							style={{ padding: "0px 0px", height: "20px" }}>
 							<ButtonContainer>

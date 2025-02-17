@@ -113,6 +113,11 @@ export class AutoDev {
 	private didAlreadyUseTool = false
 	private didCompleteReadingStream = false
 	private didAutomaticallyRetryFailedApiRequest = false
+	private pendingInputs: { text: string; images: string[] }[] = []
+
+	public queueInput(text: string, images: string[] = []): void {
+		this.pendingInputs.push({ text, images })
+	}
 
 	constructor(
 		provider: AutoDevProvider,
@@ -2834,6 +2839,25 @@ export class AutoDev {
 		includeFileDetails: boolean = false,
 		isNewTask: boolean = false,
 	): Promise<boolean> {
+		// Process any queued inputs at the start
+		if (this.pendingInputs.length > 0) {
+			const nextInput = this.pendingInputs.shift()
+			if (nextInput) {
+				const newContent: UserContent = [
+					...(nextInput.text
+						? [
+								{
+									type: "text" as const,
+									text: nextInput.text,
+								},
+							]
+						: []),
+					...formatResponse.imageBlocks(nextInput.images),
+				]
+				userContent = newContent
+			}
+		}
+
 		if (this.abort) {
 			throw new Error("AutoDev instance aborted")
 		}

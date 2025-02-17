@@ -42,6 +42,8 @@ export interface WebviewMessage {
 		| "accountLoginClicked"
 		| "accountLogoutClicked"
 		| "subscribeEmail"
+		| "queueInput"
+		| "sendMessage"
 	// | "relaunchChromeDebugMode"
 	text?: string
 	disabled?: boolean

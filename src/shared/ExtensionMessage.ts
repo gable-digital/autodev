@@ -26,6 +26,9 @@ export interface ExtensionMessage {
 		| "vsCodeLmModels"
 		| "requestVsCodeLmModels"
 		| "emailSubscribed"
+		| "queueInput"
+		| "sendMessage"
+		| "newTask"
 	text?: string
 	action?:
 		| "chatButtonClicked"

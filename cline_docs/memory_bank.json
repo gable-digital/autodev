@@ -1,0 +1,97 @@
+{
+	"preTaskActivities": {
+		"steps": [
+			"Check for memory bank files existence",
+			"Create missing files if needed",
+			"Read ALL files before proceeding",
+			"Verify complete context",
+			"Begin development"
+		]
+	},
+	"taskCompletionActivities": {
+		"steps": [
+			"Verify all changes are working as expected",
+			"Document changes in appropriate files",
+			"Update progress status",
+			"Clean up any temporary files/changes",
+			"Mark task as complete"
+		]
+	},
+	"productContext": {
+		"purpose": "VSCode extension for AI-assisted development",
+		"problems_solved": [
+			"Streamlines development workflow",
+			"Provides AI assistance for coding tasks",
+			"Enables natural language interaction for development"
+		],
+		"intended_operation": "Seamless integration with VSCode for AI-powered development assistance"
+	},
+	"activeContext": {
+		"current_task": "Implementing prompt queue feature",
+		"recent_changes": [
+			{
+				"component": "AutoDev.ts",
+				"changes": [
+					"Added pendingInputs array for message queue",
+					"Added queueInput method",
+					"Modified recursivelyMakeAutoDevRequests to process queue",
+					"Updated abortTask to clear queue"
+				]
+			},
+			{
+				"component": "ChatView.tsx",
+				"changes": [
+					"Added message queueing logic",
+					"Removed textAreaDisabled dependency",
+					"Maintained submit button control"
+				]
+			},
+			{
+				"component": "ChatTextArea.tsx",
+				"changes": [
+					"Removed textAreaDisabled prop",
+					"Removed all textAreaDisabled usages",
+					"Maintained component functionality"
+				]
+			},
+			{
+				"component": "WebviewMessage.ts",
+				"changes": ["Added queueInput message type"]
+			},
+			{
+				"component": "AutoDevProvider.ts",
+				"changes": ["Added handler for queueInput messages"]
+			}
+		],
+		"next_steps": []
+	},
+	"unfinishedPreviousContext": {},
+	"systemPatterns": {
+		"architecture": {
+			"core_components": [
+				"AutoDev.ts - Core logic",
+				"AutoDevProvider.ts - VSCode integration",
+				"ChatView.tsx - UI component"
+			],
+			"patterns": ["Message-based communication", "Event-driven architecture", "Component-based UI"]
+		}
+	},
+	"techContext": {
+		"technologies": ["TypeScript", "React", "VSCode Extension API"],
+		"development_setup": "VSCode extension development environment",
+		"constraints": ["VSCode extension limitations", "Performance considerations", "Memory management"]
+	},
+	"progress": {
+		"completed": [
+			"Prompt queue implementation",
+			"ChatView.tsx modifications",
+			"AutoDev.ts queue management",
+			"AutoDevProvider.ts updates",
+			"Message type additions",
+			"ChatTextArea.tsx updates"
+		],
+		"in_progress": [],
+		"pending": [],
+		"status": "Completed prompt queue implementation"
+	}
+}
