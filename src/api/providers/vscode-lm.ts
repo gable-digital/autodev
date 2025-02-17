@@ -7,10 +7,9 @@ import { convertToVsCodeLmMessages } from "../transform/vscode-lm-format"
 import { SELECTOR_SEPARATOR, stringifyVsCodeLmModelSelector } from "../../shared/vsCodeSelectorUtils"
 import { ApiHandlerOptions, ModelInfo, openAiModelInfoSaneDefaults } from "../../shared/api"
 
-// AutoDev does not update VSCode type definitions or engine requirements to maintain compatibility.
-// This declaration (as seen in src/integrations/TerminalManager.ts) provides types for the Language Model API in newer versions of VSCode.
-// Extracted from https://github.com/microsoft/vscode/blob/131ee0ef660d600cd0a7e6058375b281553abe20/src/vscode-dts/vscode.d.ts
-declare module "vscode" {
+// Types for VSCode Language Model API
+// We namespace these to avoid conflicts with built-in VSCode types
+declare namespace VSCodeLM {
 	enum LanguageModelChatMessageRole {
 		User = 1,
 		Assistant = 2,
@@ -61,9 +60,9 @@ declare module "vscode" {
 		sendRequest(
 			messages: LanguageModelChatMessage[],
 			options?: LanguageModelChatRequestOptions,
-			token?: CancellationToken,
+			token?: vscode.CancellationToken,
 		): Thenable<LanguageModelChatResponse>
-		countTokens(text: string | LanguageModelChatMessage, token?: CancellationToken): Thenable<number>
+		countTokens(text: string | LanguageModelChatMessage, token?: vscode.CancellationToken): Thenable<number>
 	}
 	class LanguageModelPromptTsxPart {
 		value: unknown
@@ -94,8 +93,12 @@ declare module "vscode" {
 			name?: string,
 		)
 	}
+}
+
+// Declare only the lm namespace in vscode module
+declare module "vscode" {
 	namespace lm {
-		function selectChatModels(selector?: LanguageModelChatSelector): Thenable<LanguageModelChat[]>
+		function selectChatModels(selector?: VSCodeLM.LanguageModelChatSelector): Thenable<VSCodeLM.LanguageModelChat[]>
 	}
 }
 

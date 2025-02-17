@@ -152,7 +152,7 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						case "command_output":
 							setAutoDevAsk("command_output")
 							setEnableButtons(true)
-							setPrimaryButtonText("Proceed While Running")
+							setPrimaryButtonText("Continue")
 							setSecondaryButtonText(undefined)
 							break
 						case "use_mcp_server":
@@ -297,10 +297,21 @@ const ChatView = ({ isHidden, showAnnouncement, hideAnnouncement, showHistoryVie
 						(lastMessage?.say === "api_req_started" && !JSON.parse(lastMessage.text || "{}").cost)
 
 					if (isProcessing) {
+						const queuedMessage = {
+							ts: Date.now(),
+							type: "say" as const,
+							say: "text" as const,
+							text,
+							images,
+							queued: true,
+						}
+
+						// Send message to be queued and added to UI state in AutoDev
 						vscode.postMessage({
 							type: "queueInput",
 							text,
 							images,
+							queuedMessage,
 						})
 					} else {
 						vscode.postMessage({ type: "sendMessage", text, images })

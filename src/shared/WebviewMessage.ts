@@ -2,6 +2,7 @@ import { ApiConfiguration } from "./api"
 import { AutoApprovalSettings } from "./AutoApprovalSettings"
 import { BrowserSettings } from "./BrowserSettings"
 import { ChatSettings } from "./ChatSettings"
+import { AutoDevMessage } from "./ExtensionMessage"
 
 export interface WebviewMessage {
 	type:
@@ -55,6 +56,7 @@ export interface WebviewMessage {
 	autoApprovalSettings?: AutoApprovalSettings
 	browserSettings?: BrowserSettings
 	chatSettings?: ChatSettings
+	queuedMessage?: AutoDevMessage
 
 	// For toggleToolAutoApprove
 	serverName?: string

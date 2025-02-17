@@ -81,6 +81,7 @@ export interface AutoDevMessage {
 	reasoning?: string
 	images?: string[]
 	partial?: boolean
+	queued?: boolean
 	lastCheckpointHash?: string
 	conversationHistoryIndex?: number
 	conversationHistoryDeletedRange?: [number, number] // for when conversation history is truncated for API requests
@@ -91,6 +92,7 @@ export type AutoDevAsk =
 	| "plan_mode_response"
 	| "command"
 	| "command_output"
+	| "continue_command"
 	| "completion_result"
 	| "tool"
 	| "api_req_failed"

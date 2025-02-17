@@ -841,6 +841,12 @@ export const ChatRowContent = ({ message, isExpanded, onToggleExpand, lastModifi
 				case "text":
 					return (
 						<div>
+							{message.queued ? (
+								<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+									<ProgressIndicator />
+									<span style={{ color: "var(--vscode-descriptionForeground)" }}>Queued...</span>
+								</div>
+							) : null}
 							<Markdown markdown={message.text} />
 						</div>
 					)

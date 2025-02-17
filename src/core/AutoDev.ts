@@ -115,8 +115,18 @@ export class AutoDev {
 	private didAutomaticallyRetryFailedApiRequest = false
 	private pendingInputs: { text: string; images: string[] }[] = []
 
-	public queueInput(text: string, images: string[] = []): void {
+	public async queueInput(text: string, images: string[] = []): Promise<void> {
 		this.pendingInputs.push({ text, images })
+		// Add queued message to UI immediately
+		await this.addToAutoDevMessages({
+			ts: Date.now(),
+			type: "say",
+			say: "text",
+			text,
+			images,
+			queued: true,
+		})
+		await this.providerRef.deref()?.postStateToWebview()
 	}
 
 	constructor(
@@ -1117,26 +1127,38 @@ export class AutoDev {
 
 		let userFeedback: { text?: string; images?: string[] } | undefined
 		let didContinue = false
-		const sendCommandOutput = async (line: string): Promise<void> => {
-			try {
-				const { response, text, images } = await this.ask("command_output", line)
-				if (response === "yesButtonClicked") {
-					// proceed while running
-				} else {
-					userFeedback = { text, images }
-				}
+
+		// Send initial command_output ask to enable the continue button
+		try {
+			const { response, text, images } = await this.ask("command_output", "Command started. Waiting for output...")
+			if (response === "yesButtonClicked") {
 				didContinue = true
-				process.continue() // continue past the await
-			} catch {
-				// This can only happen if this ask promise was ignored, so ignore this error
+				process.continue()
+				return [false, "Command is still running in the user's terminal."]
+			} else if (text || images) {
+				userFeedback = { text, images }
 			}
+		} catch {
+			// Ignore if ask was interrupted
 		}
 
 		let result = ""
 		process.on("line", (line) => {
 			result += line + "\n"
 			if (!didContinue) {
-				sendCommandOutput(line)
+				// Try to get user feedback on new output
+				this.ask("command_output", line)
+					.then(({ response, text, images }) => {
+						if (response === "yesButtonClicked") {
+							didContinue = true
+							process.continue()
+						} else if (text || images) {
+							userFeedback = { text, images }
+						}
+					})
+					.catch(() => {
+						// Ignore if ask was interrupted
+					})
 			} else {
 				this.say("command_output", line)
 			}
@@ -1285,17 +1307,26 @@ export class AutoDev {
 				if (totalTokens >= maxAllowedSize) {
 					// Since the user may switch between models with different context windows, truncating half may not be enough (ie if switching from claude 200k to deepseek 64k, half truncation will only remove 100k tokens, but we need to remove much more)
 					// So if totalTokens/2 is greater than maxAllowedSize, we truncate 3/4 instead of 1/2
-					// FIXME: truncating the conversation in a way that is optimal for prompt caching AND takes into account multi-context window complexity is something we need to improve
 					const keep = totalTokens / 2 > maxAllowedSize ? "quarter" : "half"
 
-					// NOTE: it's okay that we overwriteConversationHistory in resume task since we're only ever removing the last user message and not anything in the middle which would affect this range
-					this.conversationHistoryDeletedRange = getNextTruncationRange(
-						this.apiConversationHistory,
-						this.conversationHistoryDeletedRange,
-						keep,
+					// Let the user know we need to truncate and give them a chance to continue
+					const { response } = await this.ask(
+						"command_output",
+						`The conversation history has grown too large (${totalTokens.toLocaleString()} tokens). I need to truncate it to continue. This will preserve your task but remove some of the intermediate conversation steps. Click Continue to proceed.`,
 					)
-					await this.saveAutoDevMessages() // saves task history item which we use to keep track of conversation history deleted range
-					// await this.overwriteApiConversationHistory(truncatedMessages)
+
+					if (response === "yesButtonClicked") {
+						// NOTE: it's okay that we overwriteConversationHistory in resume task since we're only ever removing the last user message and not anything in the middle which would affect this range
+						this.conversationHistoryDeletedRange = getNextTruncationRange(
+							this.apiConversationHistory,
+							this.conversationHistoryDeletedRange,
+							keep,
+						)
+						await this.saveAutoDevMessages() // saves task history item which we use to keep track of conversation history deleted range
+						// await this.overwriteApiConversationHistory(truncatedMessages)
+					} else {
+						throw new Error("User cancelled context truncation")
+					}
 				}
 			}
 		}
@@ -1326,13 +1357,36 @@ export class AutoDev {
 				// request failed after retrying automatically once, ask user if they want to retry again
 				// note that this api_req_failed ask is unique in that we only present this option if the api hasn't streamed any content yet (ie it fails on the first chunk due), as it would allow them to hit a retry button. However if the api failed mid-stream, it could be in any arbitrary state where some tools may have executed, so that error is handled differently and requires cancelling the task entirely.
 				const errorMessage = this.formatErrorWithStatusCode(error)
+				const isContextError =
+					errorMessage.toLowerCase().includes("context") ||
+					errorMessage.toLowerCase().includes("token limit") ||
+					errorMessage.toLowerCase().includes("too long")
 
-				const { response } = await this.ask("api_req_failed", errorMessage)
-				if (response !== "yesButtonClicked") {
-					// this will never happen since if noButtonClicked, we will clear current task, aborting this instance
-					throw new Error("API request failed")
+				if (isContextError) {
+					// Let the user know we need to truncate and give them a chance to continue
+					const { response } = await this.ask(
+						"command_output",
+						`The API rejected the request because the conversation history is too large. I need to truncate it to continue. This will preserve your task but remove some of the intermediate conversation steps. Click Continue to proceed.`,
+					)
+
+					if (response === "yesButtonClicked") {
+						this.conversationHistoryDeletedRange = getNextTruncationRange(
+							this.apiConversationHistory,
+							this.conversationHistoryDeletedRange,
+							"half",
+						)
+						await this.saveAutoDevMessages()
+					} else {
+						throw new Error("User cancelled context truncation")
+					}
+				} else {
+					const { response } = await this.ask("api_req_failed", errorMessage)
+					if (response !== "yesButtonClicked") {
+						// this will never happen since if noButtonClicked, we will clear current task, aborting this instance
+						throw new Error("API request failed")
+					}
+					await this.say("api_req_retried")
 				}
-				await this.say("api_req_retried")
 			}
 			// delegate generator output from the recursive call
 			yield* this.attemptApiRequest(previousApiReqIndex)
