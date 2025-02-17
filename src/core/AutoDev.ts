@@ -45,6 +45,7 @@ import { getApiMetrics } from "../shared/getApiMetrics"
 import { HistoryItem } from "../shared/HistoryItem"
 import { AutoDevAskResponse, AutoDevCheckpointRestore } from "../shared/WebviewMessage"
 import { calculateApiCost } from "../utils/cost"
+import { disableEditorFeatures, restoreEditorFeatures } from "../utils/editor-settings"
 import { fileExistsAtPath } from "../utils/fs"
 import { LLMFileAccessController } from "../services/llm-access-control/LLMFileAccessController"
 import { arePathsEqual, getReadablePath } from "../utils/path"
@@ -1742,6 +1743,8 @@ export class AutoDev {
 								}
 								// update editor
 								if (!this.diffViewProvider.isEditing) {
+									// Disable editor features before opening file
+									await disableEditorFeatures()
 									// open the editor and prepare to stream content in
 									await this.diffViewProvider.open(relPath)
 								}
@@ -1883,6 +1886,7 @@ export class AutoDev {
 									)
 								}
 								await this.diffViewProvider.reset()
+								await restoreEditorFeatures()
 								await this.saveCheckpoint()
 								break
 							}
@@ -1890,6 +1894,7 @@ export class AutoDev {
 							await handleError("writing file", error)
 							await this.diffViewProvider.revertChanges()
 							await this.diffViewProvider.reset()
+							await restoreEditorFeatures()
 							await this.saveCheckpoint()
 							break
 						}
